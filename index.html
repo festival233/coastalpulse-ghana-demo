@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CoastalPulse Ghana — Keta MVP Scaffold (Prototype, Not Published)</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  :root{
+    --real:#1a7f37; --open:#0969da; --demo:#9a6700; --planned:#6e40c9;
+    --ink:#1f2328; --mut:#57606a; --bg:#f6f8fa; --line:#d0d7de;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink)}
+  header{background:#0b2a4a;color:#fff;padding:10px 14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  header h1{font-size:17px;margin:0;font-weight:650}
+  header .sub{font-size:12px;color:#c8d6e5}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;color:#fff;margin:1px 2px}
+  .b-real{background:var(--real)} .b-open{background:var(--open)}
+  .b-demo{background:var(--demo)} .b-planned{background:var(--planned)}
+  .verstrip{background:#12355c;color:#fff;border-top:2px solid #e3b341;padding:6px 14px;font-size:12px;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center}
+  .verstrip .vname{font-weight:800}
+  .verstrip .q{color:#ffd98a;font-weight:600}
+  .verstrip .sep{color:#8aa4c2}
+  #wrap{display:flex;height:calc(100vh - 152px);min-height:420px}
+  #map{flex:1;min-width:0}
+  aside{width:360px;max-width:42vw;border-left:1px solid var(--line);background:var(--bg);display:flex;flex-direction:column}
+  .tabs{display:flex;border-bottom:1px solid var(--line);background:#fff}
+  .tabs button{flex:1;border:0;background:none;padding:10px 4px;font-size:13px;font-weight:600;color:var(--mut);cursor:pointer}
+  .tabs button.active{color:#0b2a4a;border-bottom:3px solid #0b2a4a}
+  .pane{display:none;padding:12px;overflow:auto;flex:1}
+  .pane.active{display:block}
+  .pane h3{margin:6px 0 8px;font-size:14px}
+  .pane p,.pane li{font-size:13px;line-height:1.5}
+  .layer-row{display:flex;gap:8px;align-items:flex-start;padding:8px;border:1px solid var(--line);border-radius:8px;margin-bottom:8px;background:#fff}
+  .layer-row input{margin-top:3px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:10px}
+  .score{font-size:26px;font-weight:800}
+  .meter{height:8px;border-radius:4px;background:#e7ebef;overflow:hidden;margin:6px 0}
+  .meter>div{height:100%}
+  label{font-size:12px;font-weight:600;display:block;margin:8px 0 3px}
+  input[type=text],select,textarea{width:100%;padding:8px;border:1px solid var(--line);border-radius:6px;font-size:13px}
+  textarea{min-height:70px}
+  button.cta{background:#0b2a4a;color:#fff;border:0;border-radius:8px;padding:10px 14px;font-size:14px;font-weight:700;cursor:pointer;width:100%;margin-top:10px}
+  button.ghost{background:#fff;color:#0b2a4a;border:1px solid #0b2a4a;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:600;cursor:pointer;width:100%;margin-top:8px}
+  .demo-log{font-size:12px;background:#fff8e6;border:1px dashed var(--demo);border-radius:8px;padding:8px;margin-top:8px}
+  table{border-collapse:collapse;width:100%;font-size:12px}
+  th,td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+  th{background:#eef1f4}
+  footer{font-size:11px;color:var(--mut);padding:8px 14px;border-top:1px solid var(--line);background:#fff}
+  footer a{color:var(--open)}
+  .warn{background:#fff8e6;border:1px solid #e3b341;border-radius:8px;padding:8px;font-size:12px;margin:8px 0}
+  @media (max-width:760px){ #wrap{flex-direction:column;height:auto} #map{height:55vh} aside{width:100%;max-width:none;border-left:0;border-top:1px solid var(--line)} }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>CoastalPulse Ghana <span class="badge b-demo">INTERFACE PROTOTYPE</span></h1>
+    <div class="sub">StreetPulse Blue · Proposed Keta Lagoon pilot, Volta Region, Ghana · Local scaffold — not published, not a live system</div>
+  </div>
+  <div style="margin-left:auto">
+    <span class="badge b-real">REAL DATA</span>
+    <span class="badge b-open">PUBLIC-OPEN DATA</span>
+    <span class="badge b-demo">DEMONSTRATION DATA</span>
+    <span class="badge b-planned">PLANNED FUTURE FIELD DATA</span>
+  </div>
+</header>
+<div class="verstrip">
+  <span class="vname">CoastalPulse Ghana — Prototype v0.1</span>
+  <span class="sep">·</span><span class="q">Prototype</span>
+  <span class="sep">·</span><span class="q">Not yet field-deployed</span>
+  <span class="sep">·</span><span class="q">Public/open-data analysis</span>
+  <span class="sep">·</span><span class="q">Field validation planned</span>
+</div>
+
+<div id="wrap">
+  <div id="map"></div>
+  <aside>
+    <div class="tabs">
+      <button class="active" data-tab="layers">Layers</button>
+      <button data-tab="report">Report</button>
+      <button data-tab="dash">Dashboard</button>
+      <button data-tab="methods">Methods</button>
+    </div>
+
+    <div class="pane active" id="pane-layers">
+      <h3>Map layers — every layer is labeled</h3>
+      <div id="layerlist"></div>
+      <div class="warn"><b>How to read this map:</b> green = processed by us from open sources · blue = third-party open datasets · amber = illustrative/sample only · purple = roadmap, not data. Nothing here is a live sensor feed or field measurement.</div>
+    </div>
+
+    <div class="pane" id="pane-report">
+      <h3>Community reporting <span class="badge b-demo">INTERFACE PROTOTYPE</span></h3>
+      <p>This form demonstrates how community members could one day submit coastal observations. <b>No backend exists.</b> Submissions are kept only in this browser session and are labeled <b>DEMONSTRATION DATA</b>. Live reporting begins with the pilot launch — not before.</p>
+      <label>Observation type</label>
+      <select id="obstype">
+        <option>Coastal erosion</option><option>Flooding</option>
+        <option>Plastic pollution</option><option>Water quality</option><option>Fish catch / livelihoods</option>
+      </select>
+      <label>Location</label>
+      <input type="text" id="obsloc" placeholder="Click “Pick on map”, then click the map" readonly>
+      <button class="ghost" id="pickbtn">📍 Pick location on map</button>
+      <label>Photo</label>
+      <input type="text" value="Photo upload disabled in prototype — placeholder only" disabled>
+      <label>Notes</label>
+      <textarea id="obsnotes" placeholder="e.g. shoreline moved ~2 m since last rainy season (illustrative example)"></textarea>
+      <button class="cta" id="submitbtn">Submit (demo only — not sent anywhere)</button>
+      <div id="demolog"></div>
+    </div>
+
+    <div class="pane" id="pane-dash">
+      <h3>Risk / intelligence dashboard <span class="badge b-demo">DEMONSTRATION</span></h3>
+      <p>Illustrative per-zone risk scores for the Keta coastal strip. Scores are <b>not measured</b>; they are assigned from documented hazard facts (see Methods) to demonstrate the dashboard format. Field validation is pending.</p>
+      <div id="dashcards"></div>
+    </div>
+
+    <div class="pane" id="pane-methods">
+      <h3>Methods &amp; data honesty</h3>
+      <div class="card">📄 <b>Plain-language methods page:</b> <a href="methods.html">methods.html</a> — full detail on the satellite shoreline-change analysis (data sources, method, results, and known limitations — limitations are not hidden).</div>
+      <table id="methodstable">
+        <tr><th>Layer / element</th><th>Label</th><th>Source</th><th>What it is / is not</th></tr>
+      </table>
+      <h3>What this prototype does NOT contain</h3>
+      <ul>
+        <li>No live sensors or sensor feeds of any kind.</li>
+        <li>No AI / machine-learning analysis — none is built or implied.</li>
+        <li>No community-submitted data — the reporting form is an interface mockup; the demo log is illustrative.</li>
+        <li>No field measurements by Street Pulse Foundation. Satellite-derived shoreline change is computed from open archives (indicative, not survey-grade — see Methods); ground-truth field validation is still pending.</li>
+        <li>No claim of community participation, partnership, or willingness anywhere. "Proposed pilot location" wording is used throughout.</li>
+      </ul>
+      <h3>Roadmap (not built)</h3>
+      <p><span class="badge b-planned">PLANNED FUTURE FIELD DATA</span> — community water-quality transects, plastic transect surveys, deployed environmental sensors, AI-assisted imagery analysis, predictive erosion/flood analytics, fisheries intelligence module.</p>
+    </div>
+  </aside>
+</div>
+
+<footer>
+  Prototype scaffold for MIT Solve 2027 internal use only — not published. Map: © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a> (ODbL) · Satellite: EOX IT Services / Sentinel-2 cloudless (contains modified Copernicus Sentinel data, ESA) · Library: <a href="https://leafletjs.com" target="_blank">Leaflet</a>. Full sources in Methods tab · <a href="methods.html">Plain-language methods page</a>.
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/* ============ DATA (all sources documented in Methods) ============ */
+// Communities: coordinates from Nominatim / OpenStreetMap search, retrieved 2026-10-04 (PUBLIC-OPEN DATA, ODbL)
+const COMMUNITIES = [
+  {name:"Kedzi", lat:5.9584292, lon:1.0087888, note:"Recommended PRIMARY proposed pilot location (community analysis, 2026-10-03)"},
+  {name:"Vodza", lat:5.9433848, lon:1.0002681, note:"Recommended comparison / expansion site"},
+  {name:"Keta",  lat:5.9215688, lon:0.9910728, note:"Municipal capital"},
+  {name:"Tegbi", lat:5.8536655, lon:0.9733691, note:"Lagoon fishing community"},
+  {name:"Woe",   lat:5.8336832, lon:0.9558367, note:"Lagoon fishing community"},
+  {name:"Fiaxor",lat:5.8481479, lon:0.9028126, note:"Hosts active mangrove program (collaboration opportunity)"},
+  {name:"Anloga",lat:5.7936484, lon:0.8984702, note:"District capital, Anloga District"}
+];
+// DEMONSTRATION: illustrative pollution observation points (invented positions for interface demo — badged)
+const DEMO_POLLUTION = [
+  {lat:5.905, lon:1.005, type:"Plastic accumulation", note:"Illustrative sample point"},
+  {lat:5.930, lon:0.985, type:"Drainage outfall (reported)", note:"Illustrative sample point"},
+  {lat:5.870, lon:0.960, type:"Water discoloration", note:"Illustrative sample point"},
+  {lat:5.950, lon:1.020, type:"Fishing debris", note:"Illustrative sample point"},
+  {lat:5.890, lon:0.940, type:"Plastic accumulation", note:"Illustrative sample point"}
+];
+// DEMONSTRATION: illustrative 1–5 risk scores per zone (see Methods for assignment basis)
+const ZONES = [
+  {name:"Kedzi coastal strip", score:5, drivers:"Documented erosion ~17 m/yr down-drift of sea defence; 2003 resettlement history; sea + lagoon frontage."},
+  {name:"Keta town frontage", score:4, drivers:"Sea-defence protected but down-drift effects; Nov 2021 tidal damage in district."},
+  {name:"Vodza", score:3, drivers:"Flood + erosion exposure; 72 registered canoes (documented fisheries presence)."},
+  {name:"Tegbi – Woe lagoon shore", score:3, drivers:"Lagoon-side flood exposure; active UN-Habitat project at Woe (coordination needed)."},
+  {name:"Fiaxor – Anloga", score:2, drivers:"Active mangrove restoration (REDAW/Terraformation) — monitoring opportunity, not greenfield."}
+];
+
+/* ============ MAP ============ */
+const map = L.map('map').setView([5.90, 0.99], 11);
+
+const osmBase = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {maxZoom:19, attribution:'© OpenStreetMap contributors (ODbL)'});
+const s2 = L.tileLayer.wms('https://tiles.maps.eox.at/wms?', {
+  layers:'s2cloudless_3857', format:'image/jpeg', transparent:false,
+  attribution:'EOX IT Services — Sentinel-2 cloudless (modified Copernicus Sentinel data, ESA)'});
+const terrain = L.tileLayer.wms('https://tiles.maps.eox.at/wms?', {
+  layers:'terrain_3857', format:'image/jpeg', transparent:false,
+  attribution:'EOX terrain (SRTM-derived elevation context — NOT a flood-risk model)'});
+
+osmBase.addTo(map);
+
+// Overlay: OSM coastline (PUBLIC-OPEN) — fetched from openstreetmap.org 2026-10-04, simplified
+let coastGroup = L.layerGroup();
+fetch('data/coastline_osm.json').then(r=>r.json()).then(fc=>{
+  const all = [];
+  fc.features.forEach(f=>f.geometry.coordinates.forEach(c=>all.push(c)));
+  all.sort((a,b)=>a[0]-b[0]); // west -> east
+  // split real coastline geometry into 5 zones; colors carry DEMONSTRATION illustrative scores
+  const n = Math.ceil(all.length/5), colors = ['#9a6700','#d97706','#eab308','#9a6700','#6b7280'];
+  const scores = [2,3,3,4,5];
+  const labels = ['Fiaxor–Anloga','Tegbi–Woe lagoon shore','Vodza','Keta town frontage','Kedzi coastal strip'];
+  for(let i=0;i<5;i++){
+    const seg = all.slice(i*n,(i+1)*n+1);
+    if(seg.length<2) continue;
+    L.polyline(seg.map(c=>[c[1],c[0]]),{color:colors[i],weight:4,opacity:0.9})
+      .bindPopup('<b>'+labels[i]+'</b><br><span class="badge b-demo">DEMONSTRATION</span> Illustrative risk score: <b>'+scores[i]+'/5</b><br>Coastline geometry: OpenStreetMap (ODbL). Score is illustrative, not measured.')
+      .addTo(coastGroup);
+  }
+  // respect the checkbox if the user toggled it while the fetch was in flight
+  if (document.getElementById('ck-coast').checked) coastGroup.addTo(map);
+}).catch(()=>{});
+
+// Overlay: Keta Lagoon polygon (PUBLIC-OPEN) — loaded once below with layer-toggle control
+
+// Overlay: community markers (PUBLIC-OPEN)
+const commGroup = L.layerGroup();
+COMMUNITIES.forEach(c=>{
+  const star = (c.name==='Kedzi') ? '⭐ ' : '';
+  L.marker([c.lat,c.lon]).bindPopup('<b>'+star+c.name+'</b> <span class="badge b-open">PUBLIC-OPEN DATA</span><br>'+c.note+'<br>Coordinates: OpenStreetMap/Nominatim search, 2026-10-04.')
+    .addTo(commGroup);
+});
+commGroup.addTo(map);
+
+// Overlay: DEMONSTRATION pollution points
+const demoGroup = L.layerGroup();
+DEMO_POLLUTION.forEach(p=>{
+  L.circleMarker([p.lat,p.lon],{radius:7,color:'#9a6700',fillColor:'#f59e0b',fillOpacity:0.8})
+    .bindPopup('<b>'+p.type+'</b> <span class="badge b-demo">DEMONSTRATION DATA</span><br>'+p.note+'. Not a real observation.')
+    .addTo(demoGroup);
+});
+
+/* ============ SHORELINE-CHANGE LAYERS (PUBLIC-OPEN DATA) ============
+   Derived by Street Pulse Foundation analysis (2026-10-04) from open
+   Copernicus Sentinel-2 L2A imagery. Method: median-NDWI waterline extraction
+   on 2016–2017 (5 scenes) and 2024–2025 (6 scenes) composites; transect
+   displacement early->late along OSM coastline normals, 100 m spacing.
+   Negative rate = landward retreat (erosion); positive = seaward advance.
+   Full method: earth-engine/METHODS.md. Indicative, not survey-grade. */
+const shoreGroup = L.layerGroup();    // 2016–17 vs 2024–25 waterlines
+const transectGroup = L.layerGroup(); // per-transect change rates
+
+// Rate (m/yr) -> color. Severe-erosion break at -8 = documented ~8 m/yr background rate (Keta validation matrix).
+function rateColor(r){
+  if (r <= -8) return '#b42318';
+  if (r <= -3) return '#e8590c';
+  if (r <  -1) return '#f59e0b';
+  if (r <=  1) return '#9ca3af';  // ~stable: within empirical method noise
+  if (r <=  3) return '#74c0fc';
+  return '#1971c2';
+}
+function shorePopup(prefix){
+  return '<b>'+prefix+' shoreline</b> <span class="badge b-open">PUBLIC-OPEN DATA</span><br>'
+    +'Satellite-derived waterline (median NDWI over Sentinel-2 L2A scenes, 10 m). '
+    +'Tidal stage averaged by compositing; not survey-grade. See Methods tab.';
+}
+fetch('earth-engine/data/shoreline_early_median.geojson').then(r=>r.json()).then(fc=>{
+  L.geoJSON(fc,{style:{color:'#1971c2',weight:2,dashArray:'6 4',opacity:0.9}})
+    .bindPopup(shorePopup('2016–2017')).addTo(shoreGroup);
+}).catch(()=>{});
+fetch('earth-engine/data/shoreline_late_median.geojson').then(r=>r.json()).then(fc=>{
+  L.geoJSON(fc,{style:{color:'#b42318',weight:2,opacity:0.9}})
+    .bindPopup(shorePopup('2024–2025')).addTo(shoreGroup);
+}).catch(()=>{});
+fetch('earth-engine/data/shoreline_change_transects.geojson').then(r=>r.json()).then(fc=>{
+  L.geoJSON(fc,{
+    pointToLayer: function(f, latlng){
+      const c = rateColor(f.properties.rate_m_per_yr);
+      return L.circleMarker(latlng,{radius:5,color:c,fillColor:c,fillOpacity:0.85,weight:1});
+    }
+  }).bindPopup(function(l){
+    const p = l.feature.properties;
+    const dir = p.rate_m_per_yr < 0 ? 'erosion (landward retreat)' : (p.rate_m_per_yr > 0 ? 'accretion (seaward advance)' : 'no detectable change');
+    return '<b>Transect #'+p.transect_id+'</b> <span class="badge b-open">PUBLIC-OPEN DATA</span><br>'
+      +'Zone: '+p.zone+'<br>'
+      +'Change: '+(p.change_m>0?'+':'')+p.change_m+' m ('+dir+')<br>'
+      +'Rate: '+(p.rate_m_per_yr>0?'+':'')+p.rate_m_per_yr+' m/yr<br>'
+      +'Period: '+p.period+'<br>'
+      +'Method: median-NDWI waterline, 100 m transects. Indicative, not survey-grade.';
+  }).addTo(transectGroup);
+}).catch(()=>{});
+// Legend shown only while a shoreline layer is toggled on
+const shoreLegend = L.control({position:'bottomright'});
+shoreLegend.onAdd = function(){
+  const d = L.DomUtil.create('div','card');
+  d.style.cssText = 'background:#fff;border:1px solid #d0d7de;border-radius:8px;padding:8px;font-size:11px;max-width:200px';
+  d.innerHTML = '<b>Shoreline change (m/yr)</b> <span class="badge b-open">PUBLIC-OPEN DATA</span><br>'
+    +'<span style="color:#b42318">●</span> ≤ −8 severe erosion<br>'
+    +'<span style="color:#e8590c">●</span> −8…−3 moderate erosion<br>'
+    +'<span style="color:#f59e0b">●</span> −3…−1 mild erosion<br>'
+    +'<span style="color:#9ca3af">●</span> ±1 stable / method noise<br>'
+    +'<span style="color:#74c0fc">●</span> +1…+3 mild accretion<br>'
+    +'<span style="color:#1971c2">●</span> > +3 strong accretion<br>'
+    +'<i>Dashed blue: 2016–17 waterline · solid red: 2024–25 waterline</i>';
+  return d;
+};
+function syncShoreLegend(){
+  const on = map.hasLayer(shoreGroup) || map.hasLayer(transectGroup);
+  if (on && !shoreLegend._map) shoreLegend.addTo(map);
+  if (!on && shoreLegend._map) map.removeControl(shoreLegend);
+}
+map.on('layeradd layerremove', syncShoreLegend);
+
+/* ============ LAYER LIST UI ============ */
+const LAYERS = [
+  {id:'osm', label:'OpenStreetMap base map', tag:'b-open', tagtext:'PUBLIC-OPEN DATA', layer:osmBase, on:true,
+   methods:['PUBLIC-OPEN DATA','https://www.openstreetmap.org/copyright','Third-party open base map (ODbL). We did not process it.']},
+  {id:'s2', label:'Sentinel-2 cloudless imagery (satellite)', tag:'b-open', tagtext:'PUBLIC-OPEN DATA', layer:s2, on:false,
+   methods:['PUBLIC-OPEN DATA','https://tiles.maps.eox.at/ (EOX WMS); data: ESA Copernicus Sentinel-2','Third-party satellite mosaic. Useful for visual shoreline inspection; not an analysis product.']},
+  {id:'terrain', label:'Elevation context (SRTM-derived terrain)', tag:'b-open', tagtext:'PUBLIC-OPEN DATA', layer:terrain, on:false,
+   methods:['PUBLIC-OPEN DATA','https://tiles.maps.eox.at/ (SRTM-derived)','Elevation shading for context only. NOT a flood-risk model — flood-exposure zones are pending.']},
+  {id:'coast', label:'Coastline + illustrative risk segments', tag:'b-demo', tagtext:'MIXED: geometry PUBLIC-OPEN / scores DEMONSTRATION', layer:coastGroup, on:true,
+   methods:['MIXED','Geometry: https://www.openstreetmap.org (natural=coastline), retrieved 2026-10-04','Real OSM coastline geometry; per-segment colors are ILLUSTRATIVE 1–5 risk scores, not measurements.']},
+  {id:'lagoon', label:'Keta Lagoon boundary', tag:'b-open', tagtext:'PUBLIC-OPEN DATA', layer:null, on:true, note:'(loads from data/lagoon_osm.json)',
+   methods:['PUBLIC-OPEN DATA','OpenStreetMap relation 6270737 via Nominatim polygon_geojson, 2026-10-04 (ODbL)','Simplified boundary — approximate, not survey-grade. Lagoon is Ramsar Site #567.']},
+  {id:'comm', label:'Community locations (7 towns/villages)', tag:'b-open', tagtext:'PUBLIC-OPEN DATA', layer:commGroup, on:true,
+   methods:['PUBLIC-OPEN DATA','Nominatim / OpenStreetMap search, retrieved 2026-10-04 (ODbL)','Real place coordinates. Kedzi = recommended primary proposed pilot location; Vodza = comparison site (analysis 2026-10-03). No engagement claimed.']},
+  {id:'shore', label:'Shorelines: 2016–2017 vs 2024–2025 (satellite-derived waterlines)', tag:'b-open', tagtext:'PUBLIC-OPEN DATA', layer:shoreGroup, on:false,
+   methods:['PUBLIC-OPEN DATA','Derived by our analysis (2026-10-04) from Copernicus Sentinel-2 L2A via AWS Open Data / Element84 Earth Search STAC (https://earth-search.aws.element84.com/v1); imagery © ESA Copernicus','Median-NDWI waterlines: 2016–2017 composite (5 scenes, dashed blue) vs 2024–2025 composite (6 scenes, solid red). Tidal stage averaged by compositing. Indicative, not survey-grade. Full method: earth-engine/METHODS.md.']},
+  {id:'transects', label:'Shoreline-change transects (per-100 m rates, 2017→2025)', tag:'b-open', tagtext:'PUBLIC-OPEN DATA', layer:transectGroup, on:false,
+   methods:['PUBLIC-OPEN DATA','Derived by our analysis (2026-10-04); same sources as shoreline layer above','106 transects along the open sandy coast (lon 0.997–1.052); rate = waterline displacement / 7.84 yr. Negative = erosion (landward retreat). Kedzi strip: median −0.66 m/yr, max erosion −9.19 m/yr. Rates within ±1 m/yr ≈ method noise. Indicative, not survey-grade.']},
+  {id:'demo', label:'Pollution observations (sample points)', tag:'b-demo', tagtext:'DEMONSTRATION DATA', layer:demoGroup, on:false,
+   methods:['DEMONSTRATION DATA','Illustrative positions created for this prototype','NOT real observations. Shows how future community/field data would render.']}
+];
+const lagoonLayerRef = {layer:null};
+fetch('data/lagoon_osm.json').then(r=>r.json()).then(fc=>{
+  lagoonLayerRef.layer = L.geoJSON(fc,{style:{color:'#0e7490',weight:2,fillColor:'#22d3ee',fillOpacity:0.25}})
+    .bindPopup('<b>Keta Lagoon</b> <span class="badge b-open">PUBLIC-OPEN DATA</span><br>Boundary: OpenStreetMap relation 6270737, simplified — approximate.');
+  // respect the checkbox if the user toggled it while the fetch was in flight
+  if (document.getElementById('ck-lagoon').checked) lagoonLayerRef.layer.addTo(map);
+}).catch(()=>{});
+
+const listEl = document.getElementById('layerlist');
+const mTable = document.getElementById('methodstable');
+LAYERS.forEach(Ly=>{
+  const row = document.createElement('div'); row.className='layer-row';
+  row.innerHTML = '<input type="checkbox" '+(Ly.on?'checked':'')+' id="ck-'+Ly.id+'"><div><b>'+Ly.label+'</b> <span class="badge '+Ly.tag+'">'+Ly.tagtext+'</span>'+(Ly.note?'<div style="font-size:11px;color:#57606a">'+Ly.note+'</div>':'')+'</div>';
+  listEl.appendChild(row);
+  row.querySelector('input').addEventListener('change', e=>{
+    let layer = (Ly.id==='lagoon') ? lagoonLayerRef.layer : Ly.layer;
+    if(!layer) return;
+    if(e.target.checked) layer.addTo(map); else map.removeLayer(layer);
+  });
+  const tr = document.createElement('tr');
+  tr.innerHTML = '<td><b>'+Ly.label+'</b></td><td><span class="badge '+Ly.tag+'">'+Ly.tagtext+'</span></td><td style="font-size:11px;word-break:break-all">'+Ly.methods[1]+'</td><td>'+Ly.methods[2]+'</td>';
+  mTable.appendChild(tr);
+});
+// extra methods rows: risk scores + reporting mockup + planned items
+[['Illustrative risk scores (dashboard + segment colors)','b-demo','Assigned in-prototype from documented hazard facts (validation matrix 2026-10-03: Kedzi ~17 m/yr down-drift erosion; Nov 2021 tidal disaster; WACA activity). NOT measured; field validation pending.'],
+ ['Community reporting form + demo log','b-demo','Interface mockup. Submissions stay in this browser session; nothing is transmitted or stored.'],
+ ['Shoreline-change from satellite archives','b-open','PUBLIC-OPEN DATA, derived by our analysis 2026-10-04 (earth-engine/METHODS.md). Open coast (106 transects, 2017-03-07 to 2025-01-07, 7.84 yr): median −0.37 m/yr; Kedzi coastal strip (n=99): median −0.66 m/yr, max erosion −9.19 m/yr at the worst transect; Keta town frontage (n=7): median +0.95 m/yr (sea-defence protected). Direction and down-drift pattern are consistent with documented erosion (~8 m/yr background, up to ~17 m/yr at hotspots); measured magnitudes are lower — field validation pending. Indicative, not survey-grade; ±1 m/yr ≈ method noise.'],
+ ['Flood-exposure zones','b-planned','Pending elevation-based analysis (SRTM) + documented flood extents.'],
+ ['Water-quality / plastic field observations','b-planned','Pending pilot-phase community transects and test kits.']
+].forEach(r=>{
+  const tr=document.createElement('tr');
+  const badgeText = r[1]==='b-demo' ? 'DEMONSTRATION DATA' : (r[1]==='b-open' ? 'PUBLIC-OPEN DATA' : 'PLANNED FUTURE FIELD DATA');
+  tr.innerHTML='<td><b>'+r[0]+'</b></td><td><span class="badge '+r[1]+'">'+badgeText+'</span></td><td style="font-size:11px">—</td><td>'+r[2]+'</td>';
+  mTable.appendChild(tr);
+});
+
+/* ============ DASHBOARD ============ */
+const dashEl = document.getElementById('dashcards');
+ZONES.forEach(z=>{
+  const pct = z.score/5*100;
+  const col = z.score>=4 ? '#b42318' : (z.score===3 ? '#9a6700' : '#1a7f37');
+  const d = document.createElement('div'); d.className='card';
+  d.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:baseline"><b>'+z.name+'</b><span class="score" style="color:'+col+'">'+z.score+'/5</span></div>'
+    +'<div class="meter"><div style="width:'+pct+'%;background:'+col+'"></div></div>'
+    +'<div style="font-size:12px;color:#57606a">'+z.drivers+'</div>'
+    +'<div style="margin-top:6px"><span class="badge b-demo">DEMONSTRATION</span></div>';
+  dashEl.appendChild(d);
+});
+
+/* ============ REPORTING MOCKUP ============ */
+let picking=false, obsLatLng=null;
+document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.pane').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  document.getElementById('pane-'+b.dataset.tab).classList.add('active');
+}));
+document.getElementById('pickbtn').addEventListener('click',()=>{
+  picking=true;
+  document.getElementById('obsloc').placeholder='Now click anywhere on the map…';
+});
+map.on('click', e=>{
+  if(!picking) return;
+  picking=false; obsLatLng=e.latlng;
+  document.getElementById('obsloc').value = e.latlng.lat.toFixed(5)+', '+e.latlng.lng.toFixed(5);
+  L.marker([e.latlng.lat,e.latlng.lng],{opacity:0.7}).addTo(map)
+    .bindPopup('Proposed observation point <span class="badge b-demo">DEMONSTRATION</span>').openPopup();
+});
+document.getElementById('submitbtn').addEventListener('click',()=>{
+  const t=document.getElementById('obstype').value,
+        n=document.getElementById('obsnotes').value||'(no notes)',
+        loc=obsLatLng?obsLatLng.lat.toFixed(5)+', '+obsLatLng.lng.toFixed(5):'(no location picked)';
+  const d=document.createElement('div'); d.className='demo-log';
+  const now=new Date().toLocaleString();
+  d.innerHTML='<b>'+t+'</b> <span class="badge b-demo">DEMONSTRATION</span><br>Location: '+loc+'<br>Notes: '+n.replace(/</g,'&lt;')+'<br><i>Logged '+now+' — browser session only. Not sent anywhere. Not a real observation.</i>';
+  document.getElementById('demolog').prepend(d);
+  obsLatLng=null; document.getElementById('obsloc').value=''; document.getElementById('obsnotes').value='';
+});
+</script>
+</body>
+</html>

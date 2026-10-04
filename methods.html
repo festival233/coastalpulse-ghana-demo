@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CoastalPulse Ghana — Methods (Prototype v0.1)</title>
+<style>
+  :root{--ink:#1f2328;--mut:#57606a;--bg:#f6f8fa;--line:#d0d7de;--navy:#0b2a4a;--open:#0969da}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+  header{background:var(--navy);color:#fff;padding:14px 18px}
+  header h1{font-size:18px;margin:0;font-weight:700}
+  header .sub{font-size:12px;color:#c8d6e5;margin-top:4px}
+  .verstrip{background:#12355c;color:#fff;border-top:2px solid #e3b341;padding:6px 18px;font-size:12px}
+  .verstrip b{font-weight:800}
+  .verstrip .q{color:#ffd98a;font-weight:600}
+  main{max-width:780px;margin:0 auto;padding:18px}
+  section{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+  h2{font-size:15px;margin:2px 0 10px}
+  p,li{font-size:14px;line-height:1.6}
+  ul{padding-left:20px;margin:6px 0}
+  table{border-collapse:collapse;width:100%;font-size:13px;margin:8px 0}
+  th,td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+  th{background:#eef1f4}
+  .lim{background:#fff8e6;border:1px solid #e3b341;border-radius:8px;padding:10px 12px;font-size:13px;margin:10px 0}
+  .no{color:#b42318;font-weight:700}
+  a{color:var(--open)}
+  footer{max-width:780px;margin:0 auto;padding:10px 18px 26px;font-size:12px;color:var(--mut)}
+</style>
+</head>
+<body>
+<header>
+  <h1>CoastalPulse Ghana — Methods <span style="font-weight:400;font-size:13px">(Prototype v0.1)</span></h1>
+  <div class="sub">How the satellite shoreline-change layers were produced, what they mean, and where they fall short. Nothing is hidden here — the limitations are part of the method.</div>
+</header>
+<div class="verstrip"><b>CoastalPulse Ghana — Prototype v0.1</b> <span class="q">· Prototype · Not yet field-deployed · Public/open-data analysis · Field validation planned</span></div>
+
+<main>
+
+<section>
+<h2>What this analysis is</h2>
+<p>An indicative, satellite-derived measurement of shoreline change along the open sandy coast of Keta, Ghana (Keta town frontage + Kedzi coastal strip). It is labeled <b>PUBLIC-OPEN DATA</b>: produced by our analysis of open Copernicus Sentinel-2 imagery — not a field measurement, not survey-grade. It is one input layer of the CoastalPulse Ghana prototype, not a finished product.</p>
+</section>
+
+<section>
+<h2>Satellite data sources</h2>
+<ul>
+  <li><b>Sensor:</b> Sentinel-2 L2A (10 m resolution), Copernicus / ESA.</li>
+  <li><b>Discovery:</b> Element84 Earth Search STAC endpoint (<a href="https://earth-search.aws.element84.com/v1">earth-search.aws.element84.com/v1</a>), querying the Registry of Open Data on AWS (<code>sentinel-2-l2a</code>).</li>
+  <li><b>Attribution:</b> contains modified Copernicus Sentinel data (ESA), 2017 &amp; 2024–2025.</li>
+  <li><b>Early period:</b> 5 scenes, 2016-08-01 → 2017-06-30, cloud cover &lt; 30%.</li>
+  <li><b>Late period:</b> 6 scenes, 2024-09-01 → 2025-06-30, cloud cover &lt; 30%.</li>
+  <li><b>Effective dates (composite mid-dates):</b> 2017-03-07 → 2025-01-07 = <b>7.84 years</b>.</li>
+</ul>
+<p><b>No Google Earth Engine quota was consumed.</b> The analysis ran directly on public STAC + AWS Open Data COGs. No AWS charges were incurred (no requester-pays on this dataset).</p>
+</section>
+
+<section>
+<h2>Shoreline extraction method</h2>
+<ol>
+  <li>Computed the NDWI water index = (B03 green − B08 NIR) / (B03 + B08) for each scene (McFeeters 1996).</li>
+  <li>Took the <b>pixel-wise median</b> NDWI across the valid scene stack; water = median NDWI &gt; 0.</li>
+  <li>Identified the ocean as the largest connected water component (8-connectivity labeling).</li>
+  <li>Took the shoreline as the 0.5 contour of the ocean mask, converted from UTM 31N to lon/lat.</li>
+  <li>Pixels with cloud shadow or cloud (SCL classes 3, 8, 9) were excluded; a pixel entered the median only with ≥ 3 valid observations.</li>
+</ol>
+</section>
+
+<section>
+<h2>Why a median composite (a QA win)</h2>
+<p>A satellite photo captures the shoreline at whatever tide happened to be out when the satellite passed. A single-date waterline therefore mixes <em>real</em> shoreline change with <em>tidal-stage</em> difference — an artifact of the acquisition, not the coast.</p>
+<p><b>Median compositing averages out tidal-stage variation</b>, so the resulting waterline approximates a mid-tide position rather than an arbitrary acquisition tide.</p>
+<p>This was not an abstract concern: our <b>first analysis used single dates (2017-01-04 vs 2025-01-22) and QA found a whole-coast systematic seaward offset in the 2025 scene — tidal-stage bias, not real accretion.</b> That analysis was discarded; its outputs were archived (<code>earth-engine/data/qa_superseded_single_date/</code>) and are <b>not used</b> in the prototype. The median-composite method replaced it.</p>
+</section>
+
+<section>
+<h2>Transect methodology</h2>
+<ul>
+  <li>Transects placed every <b>100 m</b> along the OpenStreetMap coastline baseline, running west → east.</li>
+  <li>Restricted to the <b>open sandy coast (lon 0.997–1.052)</b>: Keta town frontage + Kedzi coastal strip. The Keta inlet, groynes, and lagoon mouth were <b>excluded as artifact-prone</b>.</li>
+  <li><b>106 transects</b>. For each, a seaward-normal ray was intersected with each period's waterline; displacement = late − early along the normal; rate = displacement / 7.84 yr.</li>
+  <li><b>Negative = landward retreat (erosion); positive = seaward advance (accretion).</b></li>
+</ul>
+</section>
+
+<section>
+<h2>Results (computed, not smoothed)</h2>
+<table>
+  <tr><th>Zone</th><th>n</th><th>Mean (m/yr)</th><th>Median (m/yr)</th><th>Max erosion (m/yr)</th><th>Max accretion (m/yr)</th></tr>
+  <tr><td>Open coast</td><td>106</td><td>−0.21</td><td>−0.37</td><td>−9.19</td><td>+21.49</td></tr>
+  <tr><td>Kedzi coastal strip</td><td>99</td><td>−0.36</td><td><b>−0.66</b></td><td>−9.19</td><td>—</td></tr>
+  <tr><td>Keta town frontage</td><td>7</td><td>+1.98</td><td>+0.95</td><td>−1.86</td><td>—</td></tr>
+</table>
+<p><b>Spatial pattern:</b> the westernmost 20 transects (Kedzi / down-drift end): median −0.88 m/yr; the easternmost 20: median +0.92 m/yr. Erosion is concentrated at the down-drift western end, accretion further east — consistent with the documented pattern.</p>
+</section>
+
+<section>
+<h2>Known uncertainties</h2>
+<div class="lim">
+<ul>
+  <li><b>±1 m/yr noise floor.</b> An empirical check on a 5-day scene pair (2025-01-22 → 2025-01-27, n=106) — where no real change could occur — found mean displacement −4.3 m, mean-abs 14.9 m, max-abs 141.1 m. Single-scene waterlines carry ~15 m tidal/method jitter; median compositing reduces it but does not eliminate it. <b>Rates within ±1 m/yr should be treated as noise.</b></li>
+  <li><b>~±2.5 m/yr per-transect method uncertainty</b> (10 m pixels over a 7.84 yr baseline).</li>
+  <li><b>10 m pixels</b> → shoreline position uncertain to roughly ±10 m per waterline.</li>
+</ul>
+</div>
+</section>
+
+<section>
+<h2>Why our rates differ from published hotspot rates — and why that's expected</h2>
+<p>Documented rates for this coast are ~8 m/yr background erosion and up to ~17 m/yr immediately down-drift of the Keta Sea Defence (Kedzi side; 2025 Harvard "terminal groyne" study). Our measured transect-median rates (Kedzi −0.66 m/yr) are well below those figures. Verdict: <b>directional/pattern agreement, magnitude shortfall — do not overclaim.</b> Plausible reasons:</p>
+<ul>
+  <li>Documented rates describe <b>specific hotspots/periods</b>; ours is a transect-median over the open sandy coast — different things.</li>
+  <li>The inlet/groyne zone (<b>lon &lt; 0.997, excluded as artifact-prone</b>) may contain the fastest-eroding section.</li>
+  <li>Method uncertainty (~±2.5 m/yr per transect, ±1 m/yr noise floor).</li>
+  <li>Different time windows; and possible real deceleration — <b>cannot be distinguished here</b>.</li>
+</ul>
+</section>
+
+<section>
+<h2 class="no">Limitations — read before using these numbers</h2>
+<div class="lim">
+<ul>
+  <li><b>Residual tidal bias cannot be fully excluded.</b> Median compositing reduces but does not eliminate tidal-stage effects; seasonal beach-profile differences between the two scene windows can leak in.</li>
+  <li><b>No tidal correction</b> against a tide gauge.</li>
+  <li><b>No ground-truth GPS survey.</b></li>
+  <li><b>Not survey-grade.</b> Not suitable for engineering, compensation, or resettlement decisions.</li>
+  <li>The inlet, groynes, and lagoon mouth are excluded — only the open sandy coast is reported.</li>
+</ul>
+</div>
+<p><b>Explicit need for field validation:</b> a GPS shoreline survey is <b>required before these rates are used for anything beyond indicative visualization</b>. Field validation is planned, not yet done.</p>
+</section>
+
+<section>
+<h2>What this prototype does not do</h2>
+<ul>
+  <li><b>Nothing is field-deployed.</b> No sensors, no field measurements by Street Pulse Foundation.</li>
+  <li><b>The community reporting interface is a prototype with no backend.</b> Demo submissions stay in the browser session only; nothing is transmitted or stored.</li>
+  <li>No AI / machine-learning analysis is built or implied.</li>
+</ul>
+</section>
+
+<section>
+<h2>Full technical record</h2>
+<p>The complete methods note, scripts, QA artifacts, and noise-check outputs live at <code>earth-engine/METHODS.md</code> (analysis date 2026-10-04). The numbers on this page are copied from it exactly.</p>
+<p><a href="index.html">← Back to the CoastalPulse Ghana prototype map</a></p>
+</section>
+
+</main>
+<footer>
+  CoastalPulse Ghana — Prototype v0.1 · Street Pulse Foundation (StreetPulse Blue). Internal prototype for MIT Solve 2027 preparation — not published. Map tiles: © OpenStreetMap contributors (ODbL). Imagery attribution: contains modified Copernicus Sentinel data (ESA), 2017 &amp; 2024–2025.
+</footer>
+</body>
+</html>
