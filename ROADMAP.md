@@ -10,10 +10,12 @@ The goal now is the transition from **prototype → validated pilot**: one coast
 zone, real community findings, and the field validation needed to stand behind the
 numbers. Funders are invited to help finance that transition.
 
-**Built on real data, not placeholders.** Every erosion rate shown in v0.1 is
-computed from genuine satellite composites (median open-coast change −0.37 m/yr;
-Kedzi strip median −0.66 m/yr; Keta town frontage mild accretion). Methods,
-assumptions, and noise floors are published alongside the data
+**Built on real data, not placeholders.** Every erosion rate shown is
+computed from genuine satellite composites (Shoreline Analysis v2 — Sentinel-Anchored:
+39 of 97 transects eroding beyond the ±1 m/yr noise floor; worst observed erosion
+−10.74 m/yr in the western/down-drift hotspot; west-half median −2.59 vs east-half
++0.91 m/yr; Keta town frontage accretion signal; broad medians within method noise).
+Methods, assumptions, and noise floors are published alongside the data
 (see `methods.html`).
 
 ---

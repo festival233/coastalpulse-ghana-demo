@@ -8,7 +8,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CoastalPulse Ghana — Methods (Prototype v0.2.1)</title>
+<title>CoastalPulse Ghana — Methods (Prototype v0.2.3)</title>
 <style>
   :root{--ink:#1f2328;--mut:#57606a;--bg:#f6f8fa;--line:#d0d7de;--navy:#0b2a4a;--open:#0969da;--demo:#9a6700}
   *{box-sizing:border-box}
@@ -43,10 +43,10 @@
 </head>
 <body>
 <header>
-  <h1>CoastalPulse Ghana — Methods <span style="font-weight:400;font-size:13px">(Prototype v0.2.1)</span></h1>
+  <h1>CoastalPulse Ghana — Methods <span style="font-weight:400;font-size:13px">(Prototype v0.2.3)</span></h1>
   <div class="sub">How the satellite shoreline-change and flood analyses were produced, what they mean, and where they fall short. Nothing is hidden here — the limitations are part of the method.</div>
 </header>
-<div class="verstrip"><b>CoastalPulse Ghana — Prototype v0.2.1</b> <span class="q">· Prototype · Not yet field-deployed · Public/open-data analysis · Field validation planned</span></div>
+<div class="verstrip"><b>CoastalPulse Ghana — Prototype v0.2.3</b> <span class="q">· Prototype · Not yet field-deployed · Public/open-data analysis · Field validation planned</span></div>
 
 <main>
 
@@ -56,13 +56,13 @@
 <div class="provbox">
 <b>Provenance — shoreline-change layer</b> <span class="badge b-open">PUBLIC-OPEN DATA</span> <span class="badge b-ind">INDICATIVE</span> <span class="badge b-fvp">⚠ FIELD VALIDATION PENDING</span>
 <table>
-<tr><th>SOURCE</th><td>Copernicus Sentinel-2 L2A (10 m), Copernicus / ESA — discovery via Element84 Earth Search STAC / AWS Open Data (<code>sentinel-2-l2a</code>); transect baseline: OpenStreetMap coastline (ODbL). Attribution: contains modified Copernicus Sentinel data (ESA), 2017 &amp; 2024–2025; © OpenStreetMap contributors.</td></tr>
-<tr><th>DATE</th><td>Analysis 2026-10-04; automated 5-stage pipeline re-run verified byte-identical 2026-10-05. Imagery composite mid-dates: 2017-03-07 → 2025-01-07 (7.84 yr).</td></tr>
-<tr><th>METHOD</th><td>Pixel-wise median-NDWI waterlines per period; 106 shore-normal transects at 100 m spacing along the open sandy coast (lon 0.997–1.052); rate = waterline displacement / 7.84 yr. Full record: <code>earth-engine/METHODS.md</code>.</td></tr>
+<tr><th>SOURCE</th><td>Copernicus Sentinel-2 L2A (10 m), Copernicus / ESA — discovery via Element84 Earth Search STAC / AWS Open Data (<code>sentinel-2-l2a</code>); transect baseline: the Foundation's own early-period Sentinel-2 median waterline (no third-party geometry in the analytical chain). Transect dataset: CC BY 4.0 © Street Pulse Foundation. Attribution: Contains modified Copernicus Sentinel data 2016–2025 (ESA); © OpenStreetMap contributors (base map only, ODbL).</td></tr>
+<tr><th>DATE</th><td>Analysis 2026-10-05; methodology: CoastalPulse Shoreline Analysis v2 — Sentinel-Anchored (supersedes the OSM-anchored v1, archived). Imagery composite mid-dates: 2017-03-07 → 2025-01-07 (7.84 yr).</td></tr>
+<tr><th>METHOD</th><td>Pixel-wise median-NDWI waterlines per period; 97 shore-normal transects at 100 m spacing anchored to the Sentinel-2 early waterline along the open sandy coast (lon 0.998–1.045); rate = waterline displacement / 7.84 yr. Full record: <code>earth-engine/METHODS.md</code>.</td></tr>
 <tr><th>CONFIDENCE</th><td><b>INDICATIVE</b> — per <code>CONFIDENCE-FRAMEWORK.md</code> §3 (per-transect uncertainty ~±2.5 m/yr exceeds the median signals; default ceiling for satellite-derived layers without ground truth).</td></tr>
 <tr><th>UNCERTAINTY</th><td>±1 m/yr noise floor (empirical 5-day scene-pair check: mean-abs displacement 14.9 m); ~±2.5 m/yr per-transect method uncertainty (10 m pixels over 7.84 yr); rates within ±1 m/yr are treated as noise.</td></tr>
 <tr><th>FIELD VALIDATION STATUS</th><td><b>FIELD VALIDATION PENDING</b> — no GPS shoreline survey, no tide-gauge correction; no ground truth for the displayed rates.</td></tr>
-<tr><th>LAST UPDATED</th><td>2026-10-05 (Prototype v0.2.1).</td></tr>
+<tr><th>LAST UPDATED</th><td>2026-10-05 (Prototype v0.2.3).</td></tr>
 </table>
 </div>
 </section>
@@ -99,24 +99,26 @@
 </section>
 
 <section>
-<h2>Transect methodology</h2>
+<h2>Transect methodology — Shoreline Analysis v2 (Sentinel-Anchored)</h2>
 <ul>
-  <li>Transects placed every <b>100 m</b> along the OpenStreetMap coastline baseline, running west → east.</li>
-  <li>Restricted to the <b>open sandy coast (lon 0.997–1.052)</b>: Keta town frontage + Kedzi coastal strip. The Keta inlet, groynes, and lagoon mouth were <b>excluded as artifact-prone</b>.</li>
-  <li><b>106 transects</b>. For each, a seaward-normal ray was intersected with each period's waterline; displacement = late − early along the normal; rate = displacement / 7.84 yr.</li>
+  <li>Transects placed every <b>100 m</b> along the Foundation's own early-period Sentinel-2 median waterline (2017-03-07 composite) as the baseline — the DSAS-standard approach of casting transects from the earliest shoreline. <b>No OpenStreetMap geometry enters the analytical chain</b> (OSM remains in the product only for base mapping, under ODbL attribution).</li>
+  <li>Restricted to the <b>open sandy coast (lon 0.998–1.045)</b>: Keta town frontage + Kedzi coastal strip. The Keta inlet, groynes, and lagoon mouth were <b>excluded as artifact-prone</b>.</li>
+  <li><b>97 transects</b>. For each, a seaward-normal ray was intersected with each period's waterline; displacement = late − early along the normal; rate = displacement / 7.84 yr.</li>
   <li><b>Negative = landward retreat (erosion); positive = seaward advance (accretion).</b></li>
+  <li>This v2 analysis supersedes the OSM-anchored v1 (106 transects), archived with full provenance. The baseline was selected on methodological grounds before any new result was computed; Phase-1 QA concluded the two analyses are <b>materially consistent</b>.</li>
 </ul>
 </section>
 
 <section>
-<h2>Results (computed, not smoothed)</h2>
+<h2>Results (computed, not smoothed) — and how to read them</h2>
 <table>
   <tr><th>Zone</th><th>n</th><th>Mean (m/yr)</th><th>Median (m/yr)</th><th>Max erosion (m/yr)</th><th>Max accretion (m/yr)</th></tr>
-  <tr><td>Open coast</td><td>106</td><td>−0.21</td><td>−0.37</td><td>−9.19</td><td>+21.49</td></tr>
-  <tr><td>Kedzi coastal strip</td><td>99</td><td>−0.36</td><td><b>−0.66</b></td><td>−9.19</td><td>—</td></tr>
-  <tr><td>Keta town frontage</td><td>7</td><td>+1.98</td><td>+0.95</td><td>−1.86</td><td>—</td></tr>
+  <tr><td>Open coast</td><td>97</td><td>−0.26</td><td>0.00</td><td>−10.74</td><td>+14.01</td></tr>
+  <tr><td>Kedzi coastal strip</td><td>91</td><td>−0.37</td><td>−0.15</td><td>−10.74</td><td>—</td></tr>
+  <tr><td>Keta town frontage</td><td>6</td><td>+1.41</td><td>+1.64</td><td>−1.86</td><td>—</td></tr>
 </table>
-<p><b>Spatial pattern:</b> the westernmost 20 transects (Kedzi / down-drift end): median −0.88 m/yr; the easternmost 20: median +0.92 m/yr. Erosion is concentrated at the down-drift western end, accretion further east — consistent with the documented pattern.</p>
+<p><b>How to read these numbers (important):</b> the broad medians — open-coast 0.00 m/yr, Kedzi −0.15 m/yr — fall <b>within the ±1 m/yr method noise floor</b> and must not be presented as confident measured erosion rates. The informative signals are: <b>39 of 97 transects (40.2%) erode beyond the noise floor</b>; the strongest observed erosion is <b>−10.74 m/yr</b>, concentrated in the same western/down-drift hotspot; the <b>west-half median (−2.59 m/yr) vs east-half median (+0.91 m/yr)</b> shows the erosion/accretion split; and the Keta town frontage continues to show an <b>accretion signal</b>. <b>The spatial pattern is more informative than the overall median.</b> Field validation remains required.</p>
+<p><b>Spatial pattern:</b> erosion concentrated at the down-drift western end, accretion further east — consistent with the documented pattern, and slightly stronger in this v2 analysis than in v1.</p>
 </section>
 
 <section>
@@ -132,7 +134,7 @@
 
 <section>
 <h2>Why our rates differ from published hotspot rates — and why that's expected</h2>
-<p>Documented rates for this coast are ~8 m/yr background erosion and up to ~17 m/yr immediately down-drift of the Keta Sea Defence (Kedzi side; 2025 Harvard "terminal groyne" study). Our measured transect-median rates (Kedzi −0.66 m/yr) are well below those figures. Verdict: <b>directional/pattern agreement, magnitude shortfall — do not overclaim.</b> Plausible reasons:</p>
+<p>Documented rates for this coast are ~8 m/yr background erosion and up to ~17 m/yr immediately down-drift of the Keta Sea Defence (Kedzi side; 2025 Harvard "terminal groyne" study). Our measured rates sit well below those figures — and our broad medians (open-coast 0.00, Kedzi −0.15 m/yr) fall within the ±1 m/yr method noise floor, so they are not confident erosion-rate claims at all. Verdict: <b>directional/pattern agreement, magnitude shortfall — do not overclaim.</b> Plausible reasons:</p>
 <ul>
   <li>Documented rates describe <b>specific hotspots/periods</b>; ours is a transect-median over the open sandy coast — different things.</li>
   <li>The inlet/groyne zone (<b>lon &lt; 0.997, excluded as artifact-prone</b>) may contain the fastest-eroding section.</li>
@@ -169,7 +171,7 @@
 <tr><th>CONFIDENCE</th><td><b>INDICATIVE</b> — per <code>CONFIDENCE-FRAMEWORK.md</code> §3 (threshold-sensitive with no ground truth to anchor the threshold; default ceiling for unvalidated satellite layers).</td></tr>
 <tr><th>UNCERTAINTY</th><td>Threshold-sensitive: 30.8–65.9 ha across the −2/−3/−4 dB sweep (~2× variation — always a range, never a point estimate); ≈ ±40 m absolute polygon placement uncertainty (relative co-registration 0.00 px); quiet-pair no-flood floor 0–2.3 ha.</td></tr>
 <tr><th>FIELD VALIDATION STATUS</th><td><b>FIELD VALIDATION PENDING</b> — no field-mapped flood extents, no surveyed water levels, and no tide-gauge validation exist for this event.</td></tr>
-<tr><th>LAST UPDATED</th><td>2026-10-05 (Prototype v0.2.1).</td></tr>
+<tr><th>LAST UPDATED</th><td>2026-10-05 (Prototype v0.2.3).</td></tr>
 </table>
 </div>
 
@@ -241,7 +243,7 @@
 <tr><th>CONFIDENCE</th><td>Not rated — <b>DEMONSTRATION</b> content by design, never to be cited as data.</td></tr>
 <tr><th>UNCERTAINTY</th><td>Not applicable — these are interface illustrations, not measurements.</td></tr>
 <tr><th>FIELD VALIDATION STATUS</th><td>Not applicable — demonstration elements are replaced by real field data in the pilot, not validated.</td></tr>
-<tr><th>LAST UPDATED</th><td>2026-10-05 (Prototype v0.2.1).</td></tr>
+<tr><th>LAST UPDATED</th><td>2026-10-05 (Prototype v0.2.3).</td></tr>
 </table>
 </div>
 </section>
@@ -254,7 +256,7 @@
 
 </main>
 <footer>
-  CoastalPulse Ghana is a prototype initiative of StreetPulse Blue, a program of Street Pulse Foundation. Public Prototype v0.2.1 — not yet field-deployed, field validation planned. Map tiles: © OpenStreetMap contributors (ODbL). Imagery attribution: contains modified Copernicus Sentinel data (ESA), 2017 &amp; 2024–2025 (shoreline) and 2021 (flood).
+  CoastalPulse Ghana is a prototype initiative of StreetPulse Blue, a program of Street Pulse Foundation. Public Prototype v0.2.3 — not yet field-deployed, field validation planned. Map tiles: © OpenStreetMap contributors (ODbL). Imagery attribution: contains modified Copernicus Sentinel data (ESA), 2017 &amp; 2024–2025 (shoreline) and 2021 (flood).
 </footer>
 </body>
 </html>

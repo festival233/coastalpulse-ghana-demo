@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CoastalPulse Ghana — Public Prototype v0.2.1 (Keta, Ghana)</title>
+<title>CoastalPulse Ghana — Public Prototype v0.2.3 (Keta, Ghana)</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
   :root{
@@ -64,7 +64,7 @@
 <header>
   <div>
     <h1>CoastalPulse Ghana <span class="badge b-demo">INTERFACE PROTOTYPE</span></h1>
-    <div class="sub">StreetPulse Blue · CoastalPulse Ghana · Public Prototype v0.2.1 — proposed Keta Lagoon pilot, Volta Region, Ghana · Not yet field-deployed</div>
+    <div class="sub">StreetPulse Blue · CoastalPulse Ghana · Public Prototype v0.2.3 — proposed Keta Lagoon pilot, Volta Region, Ghana · Not yet field-deployed</div>
   </div>
   <div style="margin-left:auto">
     <span class="badge b-real">REAL DATA</span>
@@ -76,7 +76,7 @@
   </div>
 </header>
 <div class="verstrip">
-  <span class="vname">CoastalPulse Ghana — Prototype v0.2.1</span>
+  <span class="vname">CoastalPulse Ghana — Prototype v0.2.3</span>
   <span class="sep">·</span><span class="q">Prototype</span>
   <span class="sep">·</span><span class="q">Not yet field-deployed</span>
   <span class="sep">·</span><span class="q">Public/open-data analysis</span>
@@ -89,7 +89,7 @@
       <h2 style="margin:0 0 6px;font-size:15px">Overview — CoastalPulse Ghana <span class="badge b-open">PUBLIC PROTOTYPE</span></h2>
       <p style="margin:4px 0;font-size:13px"><b>The problem:</b> Keta's coastal communities face erosion, flooding and environmental-information gaps.</p>
       <p style="margin:4px 0;font-size:13px"><b>The solution:</b> CoastalPulse Ghana is building a repeatable coastal intelligence system — combining satellite, environmental and community data to understand changing coastal risk across hazards: erosion, flooding, water quality and plastic pollution.</p>
-      <p style="margin:4px 0;font-size:13px"><b>What works today:</b> interactive Keta/Kedzi map · satellite-derived shoreline-change analysis (2017–2025, 106 transects, <i>indicative</i>) · indicative historical flood-extent layer for one Keta event (Nov 2021) — the first entry in a planned multi-event flood library, not a one-off map · community-reporting interface <i>(interface prototype, no backend)</i> · environmental-risk dashboard <i>(illustrative concept, not measured)</i>.</p>
+      <p style="margin:4px 0;font-size:13px"><b>What works today:</b> interactive Keta/Kedzi map · satellite-derived shoreline-change analysis (2017–2025, 97 transects, <i>indicative</i>, Shoreline Analysis v2 — Sentinel-Anchored) · indicative historical flood-extent layer for one Keta event (Nov 2021) — the first entry in a planned multi-event flood library, not a one-off map · community-reporting interface <i>(interface prototype, no backend)</i> · environmental-risk dashboard <i>(illustrative concept, not measured)</i>.</p>
       <p style="margin:4px 0;font-size:13px"><b>What funding enables next:</b> local community co-design · GPS field validation · expanding the historical flood-event library · water-quality field monitoring · plastic-pollution mapping · community reporting backend · environmental sensors where justified.</p>
     </div>
     <button class="ghost" id="overview-close" style="width:auto;margin-top:0;padding:4px 12px;white-space:nowrap" aria-label="Hide overview">Hide ✕</button>
@@ -137,7 +137,7 @@
       <p>Real computed metrics from two satellite analyses. Every number below was computed from a GeoJSON in <code>earth-engine/data/</code> — not estimated. Every card carries its <b>SOURCE, DATE, METHOD, CONFIDENCE and FIELD VALIDATION STATUS</b>. Method and limitations: Methods tab · <a href="methods.html">methods.html</a>.</p>
 
       <h3>Shoreline change, 2017 → 2025 <span class="badge b-open">PUBLIC-OPEN DATA</span> <span class="badge b-ind">INDICATIVE</span> <span class="badge b-fvp">⚠ FIELD VALIDATION PENDING</span></h3>
-      <p>Satellite-derived shoreline-change analysis (2017-03-07 → 2025-01-07, 7.84 yr, 106 transects) from <code>earth-engine/data/shoreline_change_transects.geojson</code>.</p>
+      <p>Satellite-derived shoreline-change analysis (2017-03-07 → 2025-01-07, 7.84 yr, 97 transects, Shoreline Analysis v2 — Sentinel-Anchored) from <code>earth-engine/data/shoreline_change_transects.geojson</code> (CC BY 4.0 © Street Pulse Foundation; contains modified Copernicus Sentinel data 2016–2025).</p>
       <div id="evcards"></div>
 
       <hr style="border:0;border-top:2px solid var(--line);margin:16px 0">
@@ -185,7 +185,7 @@
 </div>
 
 <footer>
-  CoastalPulse Ghana is a prototype initiative of StreetPulse Blue, a program of Street Pulse Foundation. Public Prototype v0.2.1 — not yet field-deployed, field validation planned. Map: © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a> (ODbL) · Satellite: EOX IT Services / Sentinel-2 cloudless (contains modified Copernicus Sentinel data, ESA) · Library: <a href="https://leafletjs.com" target="_blank">Leaflet</a> · Projection: <a href="https://github.com/proj4js/proj4js" target="_blank">proj4js</a>. Full sources in Methods tab · <a href="methods.html">Plain-language methods page</a>.
+  CoastalPulse Ghana is a prototype initiative of StreetPulse Blue, a program of Street Pulse Foundation. Public Prototype v0.2.3 — not yet field-deployed, field validation planned. Map: © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a> (ODbL) · Satellite: EOX IT Services / Sentinel-2 cloudless (contains modified Copernicus Sentinel data, ESA) · Library: <a href="https://leafletjs.com" target="_blank">Leaflet</a> · Projection: <a href="https://github.com/proj4js/proj4js" target="_blank">proj4js</a>. Full sources in Methods tab · <a href="methods.html">Plain-language methods page</a>.
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -416,7 +416,7 @@ const LAYERS = [
   {id:'shore', label:'Shorelines: 2016–2017 vs 2024–2025 (satellite-derived waterlines)', badges:LAYER_BADGES.measured, layer:shoreGroup, on:false,
    methods:['PUBLIC-OPEN DATA + INDICATIVE + ⚠ FIELD VALIDATION PENDING','Derived by our analysis (2026-10-04) from Copernicus Sentinel-2 L2A via AWS Open Data / Element84 Earth Search STAC (https://earth-search.aws.element84.com/v1); imagery © ESA Copernicus','Median-NDWI waterlines: 2016–2017 composite (5 scenes, dashed blue) vs 2024–2025 composite (6 scenes, solid red). Tidal stage averaged by compositing. Confidence INDICATIVE (per-transect uncertainty ~±2.5 m/yr exceeds median signals). Field validation pending. Full method: earth-engine/METHODS.md.']},
   {id:'transects', label:'Shoreline-change transects (per-100 m rates, 2017→2025)', badges:LAYER_BADGES.measured, layer:transectGroup, on:false,
-   methods:['PUBLIC-OPEN DATA + INDICATIVE + ⚠ FIELD VALIDATION PENDING','Derived by our analysis (2026-10-04); same sources as shoreline layer above','106 transects along the open sandy coast (lon 0.997–1.052); rate = waterline displacement / 7.84 yr. Negative = erosion (landward retreat). Kedzi strip: median −0.66 m/yr, max erosion −9.19 m/yr. Rates within ±1 m/yr ≈ method noise. Confidence INDICATIVE. Field validation pending.']},
+   methods:['PUBLIC-OPEN DATA + INDICATIVE + ⚠ FIELD VALIDATION PENDING','Derived by our analysis (2026-10-05), CoastalPulse Shoreline Analysis v2 — Sentinel-Anchored; Sentinel-2 L2A via AWS Open Data / Element84 Earth Search STAC; imagery © ESA Copernicus. Transect dataset: CC BY 4.0 © Street Pulse Foundation. Contains modified Copernicus Sentinel data 2016–2025.','97 transects along the open sandy coast (lon 0.998–1.045); rate = waterline displacement / 7.84 yr. Negative = erosion (landward retreat). 39 of 97 (40.2%) erode beyond the ±1 m/yr noise floor; worst observed erosion −10.74 m/yr (western/down-drift hotspot); west-half median −2.59 m/yr vs east-half +0.91 m/yr; Keta town frontage shows an accretion signal (+1.64 m/yr). Broad medians (open-coast 0.00, Kedzi −0.15 m/yr) fall WITHIN method noise — spatial pattern is more informative than the overall median. Confidence INDICATIVE. Field validation pending.']},
   {id:'flood', label:'Indicative flood extent — 2021-11-07 Keta event (31 polygons, −3 dB)', badges:LAYER_BADGES.measured, layer:floodGroup, on:false, note:'(loads from earth-engine/data/flood_extent_2021-11.geojson, EPSG:32631 → WGS84 in-browser)<span id="flood-load-note"></span>',
    methods:['PUBLIC-OPEN DATA + INDICATIVE + ⚠ FIELD VALIDATION PENDING','Derived by our analysis (2026-10-04/05) from Copernicus Sentinel-1 IW GRD via AWS Open Data (sentinel-s1-l1c) / Element84 Earth Search STAC; imagery © ESA Copernicus','SAR ΔVV change detection (−2/−3/−4 dB sweep) versus Oct-2021 normal-condition extent. Indicative co-event water extent 30.8–65.9 ha (never a point estimate); not surge-only; no depth. Confidence INDICATIVE; field validation pending. Not suitable for compensation/resettlement/insurance/engineering. Full method: earth-engine/FLOOD-METHODS.md.']},
   {id:'demo', label:'Pollution observations (sample points)', badges:[['b-demo','DEMONSTRATION DATA']], layer:demoGroup, on:false,
@@ -448,7 +448,7 @@ LAYERS.forEach(Ly=>{
 // extra methods rows: risk scores + reporting mockup + shoreline summary + planned items
 [['Illustrative risk scores (dashboard + segment colors)',[['b-demo','DEMONSTRATION DATA']],'Assigned in-prototype from documented hazard facts (validation matrix 2026-10-03: Kedzi ~17 m/yr down-drift erosion; Nov 2021 tidal disaster; WACA activity). NOT measured; field validation pending.'],
  ['Community reporting form + demo log',[['b-demo','DEMONSTRATION DATA']],'Interface mockup. Submissions stay in this browser session; nothing is transmitted or stored.'],
- ['Shoreline-change from satellite archives',LAYER_BADGES.measured,'PUBLIC-OPEN DATA, derived by our analysis 2026-10-04 (earth-engine/METHODS.md). Open coast (106 transects, 2017-03-07 to 2025-01-07, 7.84 yr): median −0.37 m/yr; Kedzi coastal strip (n=99): median −0.66 m/yr, max erosion −9.19 m/yr at the worst transect; Keta town frontage (n=7): median +0.95 m/yr (sea-defence protected). Direction and down-drift pattern are consistent with documented erosion (~8 m/yr background, up to ~17 m/yr at hotspots); measured magnitudes are lower — field validation pending. Indicative, not survey-grade; ±1 m/yr ≈ method noise.'],
+ ['Shoreline-change from satellite archives',LAYER_BADGES.measured,'PUBLIC-OPEN DATA, derived by our analysis 2026-10-05 — CoastalPulse Shoreline Analysis v2, Sentinel-Anchored (earth-engine/METHODS.md). Transect dataset CC BY 4.0 © Street Pulse Foundation; Contains modified Copernicus Sentinel data 2016–2025. 97 transects, 2017-03-07 to 2025-01-07, 7.84 yr: 39 of 97 (40.2%) erode beyond the ±1 m/yr noise floor; worst observed erosion −10.74 m/yr (western/down-drift hotspot); west-half median −2.59 m/yr vs east-half +0.91 m/yr; Keta town frontage median +1.64 m/yr (accretion signal, sea-defence protected). Broad medians (open-coast 0.00, Kedzi −0.15 m/yr) fall WITHIN method noise — do not read them as confident erosion rates; the spatial pattern is the informative signal. Direction and down-drift pattern are consistent with documented erosion (~8 m/yr background, up to ~17 m/yr at hotspots); measured magnitudes are lower — field validation pending. Indicative, not survey-grade; ±1 m/yr ≈ method noise; per-transect uncertainty ~±2.5 m/yr.'],
  ['Historical flood extent from satellite archives',LAYER_BADGES.measured,'PUBLIC-OPEN DATA, derived by our analysis 2026-10-04/05 (earth-engine/FLOOD-METHODS.md). Indicative co-event water extent versus normal-condition extent for the 2021-11-07 Keta event: 30.8–65.9 ha across the −2/−3/−4 dB threshold sweep (−3 dB = 44.3 ha, 31 polygons); empirical no-flood floor 0–2.3 ha; lagoon-margin expansion, not open-beach shift. Not surge-only; no depth; not suitable for compensation/resettlement/insurance/engineering. Field validation pending.'],
  ['Real-time flood monitoring',[['b-planned','PLANNED FUTURE FIELD DATA']],'Pending future work: no live flood data exists in this prototype.'],
  ['Water-quality / plastic field observations',[['b-planned','PLANNED FUTURE FIELD DATA']],'Pending pilot-phase community transects and test kits.']
@@ -477,19 +477,20 @@ function evCard(e, prov){
   return d;
 }
 const SHORE_PROV = {
-  source:'Derived by our analysis from Copernicus Sentinel-2 L2A (10 m), AWS Open Data / Element84 Earth Search STAC; contains modified Copernicus Sentinel data (ESA)',
-  date:'Analysis 2026-10-04 · imagery composite mid-dates 2017-03-07 → 2025-01-07',
-  method:'Pixel-wise median-NDWI waterlines per period; 106 shore-normal transects at 100 m spacing; rate = waterline displacement / 7.84 yr',
-  confidence:'INDICATIVE — per-transect uncertainty (~±2.5 m/yr) exceeds the median signals; ±1 m/yr noise floor; no ground truth (per CONFIDENCE-FRAMEWORK.md §3)',
+  source:'Derived by our analysis from Copernicus Sentinel-2 L2A (10 m), AWS Open Data / Element84 Earth Search STAC. Transect dataset: CC BY 4.0 © Street Pulse Foundation. Contains modified Copernicus Sentinel data 2016–2025 (ESA)',
+  date:'Analysis 2026-10-05 · imagery composite mid-dates 2017-03-07 → 2025-01-07 · methodology: CoastalPulse Shoreline Analysis v2 — Sentinel-Anchored',
+  method:'Pixel-wise median-NDWI waterlines per period; 97 shore-normal transects at 100 m spacing anchored to the Foundation’s own early-period Sentinel-2 waterline (DSAS-standard); rate = waterline displacement / 7.84 yr',
+  confidence:'INDICATIVE — per-transect uncertainty (~±2.5 m/yr) exceeds the broad median signals; ±1 m/yr noise floor; no ground truth (per CONFIDENCE-FRAMEWORK.md §3). Broad medians fall WITHIN method noise — the spatial pattern is the informative signal.',
   validation:'PENDING — a GPS shoreline survey is required before these rates are used beyond indicative visualization'
 };
 const EVIDENCE = [
   {label:'Analysis period', value:'2017-03-07 → 2025-01-07', sub:'7.84 years of Sentinel-2 median composites'},
-  {label:'Transects analyzed', value:'106', sub:'100 m spacing along the open sandy coast (lon 0.997–1.052)'},
-  {label:'Open-coast median change rate', value:'−0.37 m/yr', sub:'negative = erosion (landward retreat)'},
-  {label:'Kedzi coastal strip median', value:'−0.66 m/yr', sub:'n = 99 transects · proposed pilot zone'},
-  {label:'Worst measured erosion', value:'#352 · −9.19 m/yr', sub:'transect 352, Kedzi coastal strip · per-transect uncertainty ~±2.5 m/yr'},
-  {label:'Eroding beyond method noise', value:'44 of 106 (41.5%)', sub:'rate < −1 m/yr (the ±1 m/yr noise floor)'},
+  {label:'Transects analyzed', value:'97', sub:'100 m spacing along the open sandy coast (lon 0.998–1.045) · Shoreline Analysis v2 — Sentinel-Anchored'},
+  {label:'Eroding beyond method noise', value:'39 of 97 (40.2%)', sub:'rate < −1 m/yr (the ±1 m/yr noise floor)'},
+  {label:'Worst observed erosion', value:'#38 · −10.74 m/yr', sub:'transect 38, western/down-drift hotspot · per-transect uncertainty ~±2.5 m/yr'},
+  {label:'West-half / east-half median', value:'−2.59 / +0.91 m/yr', sub:'erosion concentrated west (down-drift); accretion east — the spatial pattern is the signal'},
+  {label:'Keta town frontage', value:'+1.64 m/yr', sub:'n = 6 transects · accretion signal (sea-defence protected)'},
+  {label:'Broad medians (within noise)', value:'0.00 / −0.15 m/yr', sub:'open-coast / Kedzi medians fall WITHIN the ±1 m/yr noise floor — not confident erosion rates'},
   {label:'Communities represented', value:'7 named + 2 zones', sub:'7 mapped communities (Kedzi, Vodza, Keta, Tegbi, Woe, Fiaxor, Anloga) + 2 transect zones in the dataset'},
   {label:'Data honesty', value:'Indicative', sub:'not survey-grade · GPS field validation required'}
 ];
