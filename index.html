@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CoastalPulse Ghana — Keta MVP Scaffold (Prototype, Not Published)</title>
+<title>CoastalPulse Ghana — Public Prototype v0.2 (Keta, Ghana)</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
   :root{
@@ -44,6 +44,8 @@
   button.cta{background:#0b2a4a;color:#fff;border:0;border-radius:8px;padding:10px 14px;font-size:14px;font-weight:700;cursor:pointer;width:100%;margin-top:10px}
   button.ghost{background:#fff;color:#0b2a4a;border:1px solid #0b2a4a;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:600;cursor:pointer;width:100%;margin-top:8px}
   .demo-log{font-size:12px;background:#fff8e6;border:1px dashed var(--demo);border-radius:8px;padding:8px;margin-top:8px}
+  #pane-dash .ill{border-style:dashed;opacity:.88}
+  #overview-close{width:auto}
   table{border-collapse:collapse;width:100%;font-size:12px}
   th,td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
   th{background:#eef1f4}
@@ -57,7 +59,7 @@
 <header>
   <div>
     <h1>CoastalPulse Ghana <span class="badge b-demo">INTERFACE PROTOTYPE</span></h1>
-    <div class="sub">StreetPulse Blue · Proposed Keta Lagoon pilot, Volta Region, Ghana · Local scaffold — not published, not a live system</div>
+    <div class="sub">StreetPulse Blue · CoastalPulse Ghana · Public Prototype v0.2 — proposed Keta Lagoon pilot, Volta Region, Ghana · Not yet field-deployed</div>
   </div>
   <div style="margin-left:auto">
     <span class="badge b-real">REAL DATA</span>
@@ -67,11 +69,24 @@
   </div>
 </header>
 <div class="verstrip">
-  <span class="vname">CoastalPulse Ghana — Prototype v0.1</span>
+  <span class="vname">CoastalPulse Ghana — Prototype v0.2</span>
   <span class="sep">·</span><span class="q">Prototype</span>
   <span class="sep">·</span><span class="q">Not yet field-deployed</span>
   <span class="sep">·</span><span class="q">Public/open-data analysis</span>
   <span class="sep">·</span><span class="q">Field validation planned</span>
+</div>
+
+<div id="overview" class="card" style="margin:10px 14px 0">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+    <div>
+      <h2 style="margin:0 0 6px;font-size:15px">Overview — CoastalPulse Ghana <span class="badge b-open">PUBLIC PROTOTYPE</span></h2>
+      <p style="margin:4px 0;font-size:13px"><b>The problem:</b> Keta's coastal communities face erosion, flooding and environmental-information gaps.</p>
+      <p style="margin:4px 0;font-size:13px"><b>The solution:</b> CoastalPulse Ghana combines satellite analysis, geospatial intelligence and future community-generated environmental observations into one coastal resilience platform.</p>
+      <p style="margin:4px 0;font-size:13px"><b>What works today:</b> interactive Keta/Kedzi mapping · satellite-derived shoreline analysis · 2017–2025 shoreline comparison · per-transect erosion/accretion analysis · community-reporting interface <i>(prototype)</i> · environmental-risk dashboard <i>(concept)</i>.</p>
+      <p style="margin:4px 0;font-size:13px"><b>What funding enables next:</b> local community co-design · GPS field validation · historical/current flood analysis · water-quality field monitoring · plastic-pollution mapping · community reporting backend · environmental sensors where justified.</p>
+    </div>
+    <button class="ghost" id="overview-close" style="width:auto;margin-top:0;padding:4px 12px;white-space:nowrap" aria-label="Hide overview">Hide ✕</button>
+  </div>
 </div>
 
 <div id="wrap">
@@ -110,8 +125,20 @@
     </div>
 
     <div class="pane" id="pane-dash">
-      <h3>Risk / intelligence dashboard <span class="badge b-demo">DEMONSTRATION</span></h3>
-      <p>Illustrative per-zone risk scores for the Keta coastal strip. Scores are <b>not measured</b>; they are assigned from documented hazard facts (see Methods) to demonstrate the dashboard format. Field validation is pending.</p>
+      <h3>Evidence Dashboard <span class="badge b-open">MEASURED · PUBLIC-OPEN DATA</span></h3>
+      <p>Real computed metrics from the satellite shoreline-change analysis (2017-03-07 → 2025-01-07, 7.84 yr, 106 transects). Every number below was computed from <code>earth-engine/data/shoreline_change_transects.geojson</code> — not estimated. Method and limitations: Methods tab · <a href="methods.html">methods.html</a>.</p>
+      <div id="evcards"></div>
+      <div class="card">
+        <b>Open datasets integrated</b>
+        <ul style="padding-left:18px;margin:6px 0">
+          <li>Copernicus Sentinel-2 L2A imagery via Element84 Earth Search STAC / AWS Open Data (shoreline-analysis input; contains modified Copernicus Sentinel data, ESA)</li>
+          <li>OpenStreetMap — base map, coastline geometry, community coordinates (ODbL)</li>
+          <li>Keta Lagoon boundary — OpenStreetMap relation 6270737 (Keta Lagoon is Ramsar Site #567)</li>
+        </ul>
+      </div>
+      <hr style="border:0;border-top:2px solid var(--line);margin:16px 0">
+      <h3>Illustrative concept — not measured <span class="badge b-demo">DEMONSTRATION</span></h3>
+      <div class="warn"><b>The 1–5 risk scores below are not measured data.</b> They are an illustrative concept — scores assigned from documented hazard facts to demonstrate what a future dashboard could look like. They are kept visually separate from the measured evidence above and must not be compared with it. Field validation is pending.</div>
       <div id="dashcards"></div>
     </div>
 
@@ -136,7 +163,7 @@
 </div>
 
 <footer>
-  Prototype scaffold for MIT Solve 2027 internal use only — not published. Map: © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a> (ODbL) · Satellite: EOX IT Services / Sentinel-2 cloudless (contains modified Copernicus Sentinel data, ESA) · Library: <a href="https://leafletjs.com" target="_blank">Leaflet</a>. Full sources in Methods tab · <a href="methods.html">Plain-language methods page</a>.
+  CoastalPulse Ghana is a prototype initiative of StreetPulse Blue, a program of Street Pulse Foundation. Public Prototype v0.2 — not yet field-deployed, field validation planned. Map: © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a> (ODbL) · Satellite: EOX IT Services / Sentinel-2 cloudless (contains modified Copernicus Sentinel data, ESA) · Library: <a href="https://leafletjs.com" target="_blank">Leaflet</a>. Full sources in Methods tab · <a href="methods.html">Plain-language methods page</a>.
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -351,17 +378,46 @@ LAYERS.forEach(Ly=>{
   mTable.appendChild(tr);
 });
 
-/* ============ DASHBOARD ============ */
+/* ============ EVIDENCE DASHBOARD (computed metrics) ============
+   Every value below was computed 2026-10-04 with a script from
+   earth-engine/data/shoreline_change_transects.geojson
+   (see earth-engine/data/evidence_dashboard_metrics.json). Do not hand-edit. */
+const EVIDENCE = [
+  {label:'Analysis period', value:'2017-03-07 → 2025-01-07', sub:'7.84 years of Sentinel-2 median composites'},
+  {label:'Transects analyzed', value:'106', sub:'100 m spacing along the open sandy coast (lon 0.997–1.052)'},
+  {label:'Open-coast median change rate', value:'−0.37 m/yr', sub:'negative = erosion (landward retreat)'},
+  {label:'Kedzi coastal strip median', value:'−0.66 m/yr', sub:'n = 99 transects · proposed pilot zone'},
+  {label:'Worst measured erosion', value:'#352 · −9.19 m/yr', sub:'transect 352, Kedzi coastal strip'},
+  {label:'Eroding beyond method noise', value:'44 of 106 (41.5%)', sub:'rate < −1 m/yr (the ±1 m/yr noise floor)'},
+  {label:'Communities represented', value:'7 named + 2 zones', sub:'7 mapped communities (Kedzi, Vodza, Keta, Tegbi, Woe, Fiaxor, Anloga) + 2 transect zones in the dataset'},
+  {label:'Data honesty', value:'Indicative', sub:'not survey-grade · GPS field validation required'}
+];
+const evEl = document.getElementById('evcards');
+EVIDENCE.forEach(e=>{
+  const d = document.createElement('div'); d.className='card';
+  d.innerHTML = '<div style="font-size:12px;color:#57606a">'+e.label+'</div>'
+    +'<div class="score" style="font-size:20px;color:#0b2a4a">'+e.value+'</div>'
+    +'<div style="font-size:12px;color:#57606a">'+e.sub+'</div>'
+    +'<div style="margin-top:5px"><span class="badge b-open">MEASURED · PUBLIC-OPEN DATA</span></div>';
+  evEl.appendChild(d);
+});
+
+/* ============ DASHBOARD (illustrative concept — not measured) ============ */
 const dashEl = document.getElementById('dashcards');
 ZONES.forEach(z=>{
   const pct = z.score/5*100;
   const col = z.score>=4 ? '#b42318' : (z.score===3 ? '#9a6700' : '#1a7f37');
-  const d = document.createElement('div'); d.className='card';
+  const d = document.createElement('div'); d.className='card ill';
   d.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:baseline"><b>'+z.name+'</b><span class="score" style="color:'+col+'">'+z.score+'/5</span></div>'
     +'<div class="meter"><div style="width:'+pct+'%;background:'+col+'"></div></div>'
     +'<div style="font-size:12px;color:#57606a">'+z.drivers+'</div>'
     +'<div style="margin-top:6px"><span class="badge b-demo">DEMONSTRATION</span></div>';
   dashEl.appendChild(d);
+});
+
+/* ============ OVERVIEW DISMISS ============ */
+document.getElementById('overview-close').addEventListener('click',()=>{
+  document.getElementById('overview').style.display='none';
 });
 
 /* ============ REPORTING MOCKUP ============ */
