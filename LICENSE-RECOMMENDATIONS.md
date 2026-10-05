@@ -9,6 +9,12 @@ code is copyright retained by Street Pulse Foundation Inc., all rights
 reserved — no MIT, Apache, GPL, AGPL, or other broad open-source license.
 See `LICENSE` and `LICENSING.md`. Strategic flexibility and IP are preserved.
 
+**Status update 2026-10-05:** recommendation (i) (CC BY 4.0 for original
+methods/reports/educational material) was approved by the founder and has
+been APPLIED — see `LICENSING.md` section (b) for the covered files. All
+other recommendations in this document remain pending approval and are not
+applied.
+
 ---
 
 ## (i) Our original methods, reports, and educational material

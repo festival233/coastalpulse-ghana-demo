@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CoastalPulse Ghana — Photo Report (Prototype)</title>
+<style>
+/* CoastalPulse Ghana · Photo-report prototype · single self-contained file, zero external requests.
+   Page-weight budget: this whole file < 130 KB. Vanilla JS only (no Leaflet/CDN) so it loads
+   offline as a file and demonstrates the low-bandwidth discipline in the design doc. */
+:root{
+  --ink:#10233b; --muted:#5b6b7f; --bg:#f4f7fa; --card:#ffffff;
+  --accent:#0a4d8c; --accent-d:#083a6a; --ok:#0f7a3d; --warn:#9a5b00; --err:#b4232a;
+  --line:#dbe4ec; --radius:12px; --tap:52px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.45}
+.proto-banner{background:repeating-linear-gradient(45deg,#7a4d00,#7a4d00 14px,#5f3c00 14px,#5f3c00 28px);color:#fff;font-weight:700;text-align:center;padding:10px 12px;font-size:14px;letter-spacing:.02em}
+.proto-banner small{display:block;font-weight:400;font-size:12px;opacity:.95}
+header.app{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--accent);color:#fff;position:sticky;top:0;z-index:20}
+header.app h1{font-size:17px;margin:0;flex:1}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;border-radius:999px;padding:8px 12px;border:2px solid #fff;background:transparent;color:#fff;min-height:44px;cursor:pointer}
+.pill .dot{width:10px;height:10px;border-radius:50%;background:#37d67a}
+.pill.off .dot{background:#ff5d5d}
+.badge{min-width:28px;height:28px;border-radius:999px;background:#ffb020;color:#3a2600;font-weight:800;display:inline-flex;align-items:center;justify-content:center;padding:0 8px;font-size:14px}
+.badge.zero{background:rgba(255,255,255,.25);color:#fff}
+main{max-width:640px;margin:0 auto;padding:12px 12px 90px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.card h2{margin:0 0 4px;font-size:19px}
+.card p.sub{margin:0 0 12px;color:var(--muted);font-size:14px}
+.step{display:none}
+.step.active{display:block}
+.stepnum{font-size:12px;font-weight:800;color:var(--accent);letter-spacing:.08em;text-transform:uppercase}
+button, .btn{display:inline-flex;align-items:center;justify-content:center;min-height:var(--tap);padding:12px 20px;border-radius:var(--radius);border:2px solid var(--accent);background:var(--accent);color:#fff;font-size:16px;font-weight:700;cursor:pointer;width:100%;margin-top:10px}
+button.ghost{background:#fff;color:var(--accent)}
+button.plain{background:#eef2f6;border-color:#c8d4df;color:var(--ink);font-weight:600}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible, input:focus-visible, textarea:focus-visible, .tile:focus-visible{outline:3px solid #ffb020;outline-offset:2px}
+.navrow{display:flex;gap:10px}
+.navrow .btn{margin-top:14px}
+.navrow .btn.back{flex:0 0 38%}
+.err{color:var(--err);font-size:14px;font-weight:600;margin-top:8px;min-height:20px}
+.note{font-size:13px;color:var(--muted);background:#f0f4f8;border-radius:8px;padding:10px 12px;margin-top:10px}
+.note strong{color:var(--ink)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.tile{min-height:76px;border:2px solid var(--line);border-radius:var(--radius);background:#fff;font-size:16px;font-weight:600;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;padding:10px}
+.tile .ic{font-size:26px}
+.tile small{font-size:12px;color:var(--muted);font-weight:400}
+.tile.sel{border-color:var(--accent);background:#e7f1fb;box-shadow:0 0 0 2px var(--accent) inset}
+input[type=text],input[type=datetime-local],textarea{width:100%;min-height:var(--tap);border:2px solid var(--line);border-radius:10px;padding:10px 12px;font-size:16px;font-family:inherit;margin-top:6px}
+textarea{min-height:110px;resize:vertical}
+label.lbl{display:block;font-weight:700;margin:14px 0 2px}
+.charcount{font-size:12px;color:var(--muted);text-align:right}
+.preview{display:flex;gap:10px;align-items:center;margin-top:10px}
+.preview img{width:96px;height:96px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
+.sizes{font-size:13px}
+.sizes b{color:var(--ok)}
+.gpsbox{border:2px dashed var(--line);border-radius:var(--radius);padding:12px;margin-top:10px;font-size:14px}
+.gpsbox .src{font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.gpsbox .src.exif{color:var(--ok)} .gpsbox .src.device{color:var(--accent)} .gpsbox .src.manual{color:var(--warn)} .gpsbox .src.none{color:var(--err)}
+#pinmap{width:100%;height:auto;border:1px solid var(--line);border-radius:10px;touch-action:manipulation;cursor:crosshair;background:#eef4f9}
+.consent{display:flex;gap:10px;align-items:flex-start;background:#fff8e8;border:2px solid #e8c56a;border-radius:var(--radius);padding:12px;margin-top:10px}
+.consent input{width:28px;height:28px;flex:0 0 28px;margin-top:2px}
+ul.privacy{font-size:14px;margin:8px 0 0;padding-left:20px;color:var(--muted)}
+ul.privacy li{margin-bottom:6px}
+.summary{font-size:14px}
+.summary dt{font-weight:700;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-top:10px}
+.summary dd{margin:2px 0 0}
+pre.payload{background:#0e1a2b;color:#cfe3ff;font-size:12px;border-radius:10px;padding:12px;overflow-x:auto;max-height:280px;overflow-y:auto}
+.chip{display:inline-block;font-size:12px;font-weight:800;border-radius:999px;padding:4px 10px;letter-spacing:.03em}
+.chip.queued{background:#fff3d6;color:#7a4d00}
+.chip.uploading{background:#dbeafe;color:#1d4ed8}
+.chip.sent{background:#dcfce7;color:#166534}
+.chip.failed{background:#fee2e2;color:#991b1b}
+.chip.conflict{background:#f3e8ff;color:#6b21a8}
+.chip.resolved{background:#e0e7ff;color:#3730a3}
+.outbox-item{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:8px;font-size:14px;background:#fff}
+.outbox-item .row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.outbox-item code{font-size:12px;background:#f0f4f8;padding:2px 6px;border-radius:6px}
+.outbox-item .meta{color:var(--muted);font-size:12px;margin-top:6px}
+.outbox-item button{width:auto;min-height:44px;padding:8px 14px;font-size:14px;margin:8px 6px 0 0}
+.syncbanner{background:#fff3d6;border:2px solid #e8c56a;color:#5f3c00;border-radius:var(--radius);padding:10px 12px;font-size:14px;font-weight:600;margin-bottom:12px;display:none}
+.syncbanner.show{display:block}
+.policy{font-size:13px;color:var(--muted)}
+.policy li{margin-bottom:6px}
+details{margin-top:10px}
+details summary{min-height:48px;display:flex;align-items:center;font-weight:700;cursor:pointer;font-size:15px}
+.toast{position:fixed;left:12px;right:12px;bottom:16px;background:#10233b;color:#fff;border-radius:12px;padding:14px;font-size:15px;font-weight:600;display:none;z-index:50;box-shadow:0 6px 24px rgba(0,0,0,.3)}
+.toast.show{display:block}
+footer{font-size:12px;color:var(--muted);text-align:center;padding:20px 12px 40px;max-width:640px;margin:0 auto}
+.kv{font-size:13px;color:var(--muted)}
+.kv b{color:var(--ink)}
+</style>
+</head>
+<body>
+
+<div class="proto-banner">
+  PROTOTYPE — NOT CONNECTED TO ANY BACKEND
+  <small>Submissions are simulated locally in this browser. Nothing leaves your device. No real personal data — synthetic fixtures only.</small>
+</div>
+
+<header class="app">
+  <h1>CoastalPulse · Report what you see</h1>
+  <span class="badge zero" id="pendingBadge" title="Reports waiting on this phone">0</span>
+  <button class="pill" id="netToggle" aria-pressed="true"><span class="dot"></span><span id="netLabel">Online</span></button>
+</header>
+
+<main>
+  <div class="syncbanner" id="syncBanner" role="status"></div>
+
+  <!-- ============ WIZARD ============ -->
+  <section class="card" id="wizard" aria-label="Report form">
+    <div class="stepnum" id="stepNum">Step 1 of 7 · Photo</div>
+
+    <!-- STEP 1: PHOTO -->
+    <div class="step active" data-step="0">
+      <h2>Take or choose a photo</h2>
+      <p class="sub">One photo is enough. A photo is optional — you can skip if your camera isn't working.</p>
+      <label class="btn" for="photoInput" style="margin-top:4px">📷&nbsp; Take photo / Choose image</label>
+      <input type="file" id="photoInput" accept="image/*" capture="environment" style="position:absolute;left:-9999px" aria-label="Take photo or choose image">
+      <div class="preview" id="photoPreview" style="display:none">
+        <img id="photoThumb" alt="Photo preview">
+        <div class="sizes" id="photoSizes"></div>
+      </div>
+      <div class="err" id="photoErr"></div>
+      <div class="note" id="exifNote" style="display:none"></div>
+      <button class="btn plain" id="skipPhoto">Skip photo — continue without one</button>
+      <div class="navrow">
+        <button class="btn ghost back" data-back disabled>Back</button>
+        <button class="btn" data-next data-from="0">Continue</button>
+      </div>
+      <div class="note"><strong>Privacy by construction:</strong> photos are re-encoded on your phone before anything is sent — that wipes the camera's hidden EXIF data (serial numbers, etc.). Only the GPS position and the date are kept, and only inside the report itself — never inside the photo file.</div>
+    </div>
+
+    <!-- STEP 2: LOCATION -->
+    <div class="step" data-step="1">
+      <h2>Where did you see it?</h2>
+      <p class="sub">We try the photo's GPS first, then your phone's GPS. You can always move the pin yourself.</p>
+      <div class="gpsbox" id="gpsBox">
+        <div class="src none" id="gpsSrc">No location yet</div>
+        <div id="gpsDetail" style="margin-top:6px">Checking…</div>
+      </div>
+      <div class="navrow" style="margin-top:4px">
+        <button class="btn plain" id="btnDeviceGps" style="flex:1">📍 Use phone GPS</button>
+        <button class="btn plain" id="btnSimGps" style="flex:1">🧪 Simulate GPS fix</button>
+      </div>
+      <label class="lbl" for="pinmap">Or move the pin on the schematic map <span class="kv">(tap to place)</span></label>
+      <svg id="pinmap" viewBox="0 0 400 300" role="img" aria-label="Schematic pilot-area map. Tap to place your report pin.">
+        <rect x="0" y="0" width="400" height="300" fill="#eef4f9"/>
+        <g stroke="#d3e0ec" stroke-width="1">
+          <line x1="80" y1="0" x2="80" y2="300"/><line x1="160" y1="0" x2="160" y2="300"/>
+          <line x1="240" y1="0" x2="240" y2="300"/><line x1="320" y1="0" x2="320" y2="300"/>
+          <line x1="0" y1="60" x2="400" y2="60"/><line x1="0" y1="120" x2="400" y2="120"/>
+          <line x1="0" y1="180" x2="400" y2="180"/><line x1="0" y1="240" x2="400" y2="240"/>
+        </g>
+        <path d="M0,205 C60,195 90,215 140,200 C190,186 230,210 290,196 C340,184 370,200 400,192 L400,300 L0,300 Z" fill="#cfe3d8" opacity="0.8"/>
+        <path d="M0,205 C60,195 90,215 140,200 C190,186 230,210 290,196 C340,184 370,200 400,192" fill="none" stroke="#0f7a3d" stroke-width="3"/>
+        <text x="8" y="20" font-size="11" fill="#5b6b7f">SCHEMATIC — pilot area, not a real map</text>
+        <text x="8" y="292" font-size="10" fill="#5b6b7f">lon 0.60°E → 1.40°E · lat 5.70°N → 6.20°N</text>
+        <circle id="pin" cx="200" cy="150" r="11" fill="#b4232a" stroke="#fff" stroke-width="3" style="display:none"/>
+        <circle id="pinHalo" cx="200" cy="150" r="20" fill="none" stroke="#b4232a" stroke-width="2" opacity="0.4" style="display:none"/>
+      </svg>
+      <div class="err" id="gpsErr"></div>
+      <div class="navrow">
+        <button class="btn ghost back" data-back>Back</button>
+        <button class="btn" data-next data-from="1">Continue</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: CATEGORY -->
+    <div class="step" data-step="2">
+      <h2>What did you see?</h2>
+      <p class="sub">Pick one. Categories match the backend pilot schema (v1).</p>
+      <div class="tiles" id="catTiles" role="radiogroup" aria-label="Report category">
+        <button class="tile" data-cat="erosion" role="radio" aria-checked="false"><span class="ic">🌊</span>Erosion<small>Shoreline washing away</small></button>
+        <button class="tile" data-cat="flooding" role="radio" aria-checked="false"><span class="ic">🌧️</span>Flooding<small>Water where it shouldn't be</small></button>
+        <button class="tile" data-cat="pollution" role="radio" aria-checked="false"><span class="ic">🗑️</span>Pollution<small>Plastic, waste, bad water</small></button>
+        <button class="tile" data-cat="damaged_infrastructure" role="radio" aria-checked="false"><span class="ic">🏚️</span>Damaged<small>Roads, walls, buildings</small></button>
+        <button class="tile" data-cat="drainage_issue" role="radio" aria-checked="false"><span class="ic">🕳️</span>Drainage<small>Blocked or broken drains</small></button>
+        <button class="tile" data-cat="other" role="radio" aria-checked="false"><span class="ic">❓</span>Other<small>Something else</small></button>
+      </div>
+      <div id="otherWrap" style="display:none">
+        <label class="lbl" for="catOther">Describe it briefly (required for "Other")</label>
+        <input type="text" id="catOther" maxlength="120" placeholder="e.g. fish catch getting smaller">
+      </div>
+      <div class="err" id="catErr"></div>
+      <div class="note">Prototype mapping note: the old mockup's "Water quality" → <b>pollution</b>, "Fish catch / livelihoods" → <b>other</b> (kept in the detail field). The discovery round may still change this list.</div>
+      <div class="navrow">
+        <button class="btn ghost back" data-back>Back</button>
+        <button class="btn" data-next data-from="2">Continue</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: DETAILS -->
+    <div class="step" data-step="3">
+      <h2>Tell us a little more</h2>
+      <label class="lbl" for="observedAt">When did you see it?</label>
+      <input type="datetime-local" id="observedAt">
+      <div class="err" id="dateErr"></div>
+      <label class="lbl" for="desc">What did you see? <span class="kv">(10–2000 characters)</span></label>
+      <textarea id="desc" maxlength="2000" placeholder="What did you see? e.g. water reached the coconut trees behind the school"></textarea>
+      <div class="charcount" id="charCount">0 / 2000</div>
+      <div class="err" id="descErr"></div>
+      <button class="btn plain" id="voiceBtn" disabled>🎙️ Voice note — PLANNED, not in this prototype</button>
+      <div class="navrow">
+        <button class="btn ghost back" data-back>Back</button>
+        <button class="btn" data-next data-from="3">Continue</button>
+      </div>
+    </div>
+
+    <!-- STEP 5: ROLE -->
+    <div class="step" data-step="4">
+      <h2>Who is reporting?</h2>
+      <p class="sub"><strong>No name needed.</strong> Just pick the role that fits best. Names and phone numbers are never asked for in the field.</p>
+      <div class="tiles" id="roleTiles" role="radiogroup" aria-label="Reporter role">
+        <button class="tile" data-role="fisherfolk" role="radio" aria-checked="false"><span class="ic">🎣</span>Fisherfolk</button>
+        <button class="tile" data-role="trader" role="radio" aria-checked="false"><span class="ic">🧺</span>Trader</button>
+        <button class="tile" data-role="youth" role="radio" aria-checked="false"><span class="ic">🧑‍🎓</span>Youth</button>
+        <button class="tile" data-role="community_leader" role="radio" aria-checked="false"><span class="ic">🤝</span>Community leader</button>
+        <button class="tile" data-role="official" role="radio" aria-checked="false"><span class="ic">🏛️</span>Official</button>
+        <button class="tile" data-role="researcher" role="radio" aria-checked="false"><span class="ic">🔬</span>Researcher</button>
+      </div>
+      <div class="err" id="roleErr"></div>
+      <div class="navrow">
+        <button class="btn ghost back" data-back>Back</button>
+        <button class="btn" data-next data-from="4">Continue</button>
+      </div>
+    </div>
+
+    <!-- STEP 6: CONSENT -->
+    <div class="step" data-step="5">
+      <h2>Before you send</h2>
+      <p class="sub">Please read this. It is written in plain language on purpose.</p>
+      <div class="card" style="background:#f8fafc;margin-bottom:0">
+        <p style="margin-top:0"><strong>What happens to your report:</strong></p>
+        <ul class="privacy">
+          <li>Your report, photo and location go to the <strong>Street Pulse Foundation</strong> review team. Nothing is published automatically.</li>
+          <li>A reviewer checks it first. Only reports the team verifies can ever appear on a public map — <strong>without your name</strong>.</li>
+          <li><strong>Faces policy:</strong> if your photo shows people's faces, reviewers blur faces before anything is published. Photos with identifiable people are not published without permission.</li>
+          <li><strong>What we strip:</strong> the photo's hidden camera data (serial numbers, device info) is wiped on your phone. We keep only the photo, its GPS position and the date.</li>
+          <li><strong>What we never ask for:</strong> your name, phone number, address or ID.</li>
+          <li>You can ask for your report to be removed at any time.</li>
+        </ul>
+      </div>
+      <label class="consent">
+        <input type="checkbox" id="consentBox">
+        <span><strong>I understand and I agree</strong> to send this report to the Street Pulse Foundation review team under these terms.</span>
+      </label>
+      <div class="err" id="consentErr"></div>
+      <div class="navrow">
+        <button class="btn ghost back" data-back>Back</button>
+        <button class="btn" data-next data-from="5">Review report</button>
+      </div>
+    </div>
+
+    <!-- STEP 7: SUMMARY -->
+    <div class="step" data-step="6">
+      <h2>Check and send</h2>
+      <p class="sub">This is exactly what will be saved.</p>
+      <dl class="summary" id="summaryList"></dl>
+      <details>
+        <summary>Report payload (matches backend schema v1 — simulated)</summary>
+        <pre class="payload" id="payloadPre"></pre>
+      </details>
+      <button class="btn" id="submitBtn">Send report</button>
+      <div class="navrow">
+        <button class="btn ghost back" data-back style="flex:1">Back</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ OFFLINE / OUTBOX PANEL ============ -->
+  <section class="card" id="offlinePanel" aria-label="Offline outbox simulation">
+    <div class="stepnum">Simulation · Store-and-forward outbox</div>
+    <h2>Outbox &amp; sync <span class="kv">(simulated)</span></h2>
+    <p class="sub">This panel simulates the offline store-and-forward design: connectivity toggle, local outbox, retry with backoff, deduplication keys, and the server-wins conflict policy. Production would use a service worker + IndexedDB; here the outbox lives in memory only.</p>
+    <div class="navrow" style="margin-top:0">
+      <button class="btn plain" id="btnFlaky" aria-pressed="false" style="flex:1">Flaky network: OFF</button>
+      <button class="btn plain" id="btnSyncNow" style="flex:1">Sync now</button>
+    </div>
+    <div class="navrow">
+      <button class="btn plain" id="btnInject" style="flex:1">+ Inject synthetic test report</button>
+      <button class="btn plain" id="btnConflict" style="flex:1">⚡ Simulate conflict on newest</button>
+    </div>
+    <div id="outboxList"><p class="kv">Outbox is empty. Submit the form above (or inject a test report) to see queueing.</p></div>
+    <details>
+      <summary>Sync protocol &amp; conflict policy (design)</summary>
+      <ul class="policy">
+        <li><b>Ordering:</b> oldest first. Text/metadata uploads before photos; photos oldest first.</li>
+        <li><b>Retry with backoff (demo-shortened):</b> attempts wait 3s → 8s → 20s here. Production schedule: 1 min → 5 min → 30 min → 2 h → 12 h, then a gentle banner ("Some reports haven't sent — check your signal"). Nothing is ever deleted without the user's explicit confirmation.</li>
+        <li><b>Deduplication:</b> every report carries a client-generated dedup key (<code>clientId + content hash</code>). Retried uploads reuse the key, so a retry can never create a duplicate on the server.</li>
+        <li><b>Conflict policy — server wins, flagged for admin review:</b> if the server already holds a different version of a report (e.g. edited by a reviewer), the local copy is <i>not</i> silently overwritten and <i>not</i> force-pushed. It is marked <span class="chip conflict">conflict</span>, kept locally, and flagged for admin review with both versions visible.</li>
+        <li><b>Idempotency</b> is a backend contract: the server must accept the same dedup key twice without creating two reports (workstream C).</li>
+        <li><b>7-day rule:</b> items older than 7 days and still unsent trigger the gentle banner — never auto-delete.</li>
+      </ul>
+    </details>
+    <details>
+      <summary>What this prototype implements for real vs. simulates</summary>
+      <ul class="policy">
+        <li><b>Real:</b> EXIF GPS extraction from the actual photo file (hand-written JPEG/APP1/TIFF parser, no library); client-side compression (canvas re-encode, max 1600px, JPEG q0.7) with before/after byte counts; EXIF stripping by re-encode (privacy by construction); form validation against the backend schema rules.</li>
+        <li><b>Simulated:</b> network (the toggle), upload latency/failures, server responses, conflict injection, GPS "simulate fix" button. The outbox is in-memory JS, not IndexedDB; there is no service worker in this single-file demo.</li>
+        <li><b>Design only:</b> service worker caching strategy, real IndexedDB schema, Background Sync, voice notes, Ewe/Ga localization, reviewer/admin flow.</li>
+      </ul>
+    </details>
+  </section>
+</main>
+
+<div class="toast" id="toast" role="status"></div>
+
+<footer>
+  CoastalPulse Ghana · Street Pulse Foundation · <strong>PROTOTYPE — demonstration only</strong><br>
+  Design: sprint-v02/MOBILE-FIELD-DESIGN.md §6 · Schema: backend/01-DATA-MODEL.md v1<br>
+  All people, places in fixtures and coordinates are synthetic and labeled as such.
+</footer>
+
+<script>
+"use strict";
+/* ================================================================
+   STATE
+================================================================ */
+const R = { photoFile:null, photoUrl:null, originalBytes:0, compressedBlob:null, compressedBytes:0,
+  exifGps:null, gpsSource:null, lat:null, lon:null, acc:null,
+  category:null, categoryOther:"", description:"", observedAt:"", reporterType:null, consent:false };
+let currentStep = 0;
+const STEPS = ["Photo","Location","Category","Details","Role","Consent","Review"];
+const $ = id => document.getElementById(id);
+
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("show"),3800); }
+function showStep(n){
+  currentStep=n;
+  document.querySelectorAll(".step").forEach(s=>s.classList.toggle("active", +s.dataset.step===n));
+  $("stepNum").textContent = `Step ${n+1} of 7 · ${STEPS[n]}`;
+  window.scrollTo({top:0,behavior:"smooth"});
+  if(n===1) autoLocate();
+  if(n===6) renderSummary();
+}
+document.querySelectorAll("[data-next]").forEach(b=>b.addEventListener("click",()=>{ if(validateStep(+b.dataset.from)) showStep(+b.dataset.from+1); }));
+document.querySelectorAll("[data-back]").forEach(b=>b.addEventListener("click",()=>showStep(currentStep-1)));
+
+/* ================================================================
+   STEP 1 — PHOTO: capture, EXIF GPS (real parser), compression
+================================================================ */
+$("photoInput").addEventListener("change", e=>{
+  const f = e.target.files[0]; if(!f) return;
+  if(!f.type.startsWith("image/")){ $("photoErr").textContent="That file is not an image. Please choose a photo."; return; }
+  $("photoErr").textContent="";
+  R.photoFile=f; R.originalBytes=f.size;
+  R.photoUrl=URL.createObjectURL(f);
+  $("photoThumb").src=R.photoUrl; $("photoPreview").style.display="flex";
+  $("photoSizes").innerHTML=`Original: <b>${kb(f.size)}</b><br>Compressing…`;
+  // 1) Try EXIF GPS from the ORIGINAL file (before re-encode strips it)
+  f.arrayBuffer().then(buf=>{
+    const gps=readExifGps(buf);
+    R.exifGps=gps;
+    const n=$("exifNote"); n.style.display="block";
+    n.innerHTML = gps
+      ? `<strong>Photo GPS found:</strong> ${gps.lat.toFixed(6)}, ${gps.lon.toFixed(6)} — will be offered on the next step.`
+      : `No GPS found in this photo's data — you can use phone GPS or place the pin manually next.`;
+    renderGps();
+  }).catch(()=>{});
+  // 2) Compress via canvas (re-encode strips ALL EXIF — privacy by construction)
+  const img=new Image();
+  img.onload=()=>{
+    const MAX=1600, scale=Math.min(1, MAX/Math.max(img.naturalWidth,img.naturalHeight));
+    const w=Math.round(img.naturalWidth*scale), h=Math.round(img.naturalHeight*scale);
+    const c=document.createElement("canvas"); c.width=w; c.height=h;
+    c.getContext("2d").drawImage(img,0,0,w,h);
+    c.toBlob(b=>{
+      R.compressedBlob=b; R.compressedBytes=b.size;
+      URL.revokeObjectURL(R.photoUrl);
+      R.photoUrl=URL.createObjectURL(b); $("photoThumb").src=R.photoUrl;
+      $("photoSizes").innerHTML=`Original: <b>${kb(R.originalBytes)}</b><br>Compressed: <b style="color:#0f7a3d">${kb(b.size)}</b> (${w}×${h}, JPEG q0.7)<br><span class="kv">EXIF wiped on re-encode — GPS kept only in report data</span>`;
+    },"image/jpeg",0.7);
+    URL.revokeObjectURL(img.src);
+  };
+  img.onerror=()=>{ $("photoErr").textContent="Could not read that image."; };
+  img.src=URL.createObjectURL(f);
+});
+$("skipPhoto").addEventListener("click",()=>{
+  R.photoFile=null; R.compressedBlob=null; $("photoPreview").style.display="none"; $("exifNote").style.display="none";
+  R.exifGps=null; toast("Continuing without a photo — that's fine.");
+  showStep(1);
+});
+const kb = b => b>1048576 ? (b/1048576).toFixed(2)+" MB" : Math.max(1,Math.round(b/1024))+" KB";
+
+/* Minimal EXIF GPS reader: JPEG SOI → APP1(Exif) → TIFF header → IFD0 → GPS IFD.
+   Reads lat/lon rationals; returns null if absent/unparseable. No library. */
+function readExifGps(buf){
+  const dv=new DataView(buf);
+  if(dv.byteLength<4 || dv.getUint16(0)!==0xFFD8) return null;
+  let off=2;
+  while(off<dv.byteLength-2){
+    if(dv.getUint8(off)!==0xFF){ off++; continue; }
+    const m=dv.getUint8(off+1);
+    if(m===0xD9||m===0xDA) break;
+    if(m===0x01||(m>=0xD0&&m<=0xD7)){ off+=2; continue; }
+    const len=dv.getUint16(off+2);
+    if(m===0xE1 && len>10){
+      const sig=String.fromCharCode(dv.getUint8(off+4),dv.getUint8(off+5),dv.getUint8(off+6),dv.getUint8(off+7),dv.getUint8(off+8),dv.getUint8(off+9));
+      if(sig==="Exif\0\0"){ const g=parseGpsIfd(dv, off+10); if(g) return g; }
+    }
+    off+=2+len;
+  }
+  return null;
+}
+function parseGpsIfd(dv,tiff){
+  const bo=String.fromCharCode(dv.getUint8(tiff),dv.getUint8(tiff+1));
+  const le = bo==="II"; if(!le && bo!=="MM") return null;
+  const u16=o=>dv.getUint16(o,le), u32=o=>dv.getUint32(o,le);
+  try{
+    if(u16(tiff+2)!==42) return null;
+    const rd=e=>{ const n=u16(e),ents={};
+      for(let i=0;i<n;i++){ const p=e+2+i*12; ents[u16(p)]={type:u16(p+2),count:u32(p+4),v:p+8}; } return ents; };
+    const ifd0=rd(tiff+u32(tiff+4));
+    if(!ifd0[0x8825]) return null;
+    const g=rd(tiff+u32(ifd0[0x8825].v));
+    if(!g[0x0002]||!g[0x0004]) return null;
+    const ascii=en=>{ let s="",p=en.count<=4?en.v:tiff+u32(en.v);
+      for(let i=0;i<en.count;i++) s+=String.fromCharCode(dv.getUint8(p+i)); return s.replace(/\0/g,""); };
+    const rats=en=>{ const out=[]; let p=en.count*8>4?tiff+u32(en.v):en.v;
+      for(let i=0;i<en.count;i++){ const n=dv.getUint32(p+i*8,le),d=dv.getUint32(p+i*8+4,le); out.push(d?n/d:0);} return out; };
+    const dec=(dms,ref)=>{ const v=dms[0]+dms[1]/60+dms[2]/3600; return (ref==="S"||ref==="W")?-v:v; };
+    const lat=dec(rats(g[0x0002]),ascii(g[0x0001])), lon=dec(rats(g[0x0004]),ascii(g[0x0003]));
+    return (isFinite(lat)&&isFinite(lon))?{lat,lon}:null;
+  }catch(e){ return null; }
+}
+/* ================================================================
+   STEP 2 — LOCATION: EXIF GPS → device GPS → manual pin
+================================================================ */
+function setGps(source, lat, lon, acc){
+  R.gpsSource=source; R.lat=lat; R.lon=lon; R.acc=acc; renderGps();
+}
+function renderGps(){
+  const src=$("gpsSrc"), det=$("gpsDetail");
+  const fmt=(v,d)=>v==null?"—":v.toFixed(6)+"°"+d;
+  if(R.lat==null){
+    src.className="src none"; src.textContent="No location yet";
+    det.innerHTML="Place the pin on the map, use phone GPS, or go back and add a photo with GPS.";
+  } else {
+    const label={exif:["src exif","Photo GPS"],device:["src device","Phone GPS"],simulated:["src device","Simulated GPS fix"],manual:["src manual","Manual pin"]}[R.gpsSource]||["src none","Unknown"];
+    src.className=label[0]; src.textContent=label[1]+(R.gpsSource==="simulated"?" — SYNTHETIC FIXTURE":"");
+    det.innerHTML=`<b>${fmt(R.lat,"N")}, ${fmt(R.lon,"E")}</b><br><span class="kv">Accuracy: ${R.acc==null?"manual placement — LOW":("±"+Math.round(R.acc)+" m")} · `+
+      (R.acc!=null&&R.acc<=25?"good enough for HIGH confidence tier (with photo)":"below 25 m — affects confidence tier")+"</span>";
+  }
+  // move pin
+  const pin=$("pin"), halo=$("pinHalo");
+  if(R.lat==null){ pin.style.display="none"; halo.style.display="none"; return; }
+  const x=(R.lon-0.60)/0.80*400, y=(6.20-R.lat)/0.50*300;
+  pin.style.display="block"; halo.style.display="block";
+  pin.setAttribute("cx",x); pin.setAttribute("cy",y);
+  halo.setAttribute("cx",x); halo.setAttribute("cy",y);
+}
+function autoLocate(){
+  if(R.lat!=null) { renderGps(); return; }           // already have one
+  if(R.exifGps){ setGps("exif", R.exifGps.lat, R.exifGps.lon, null); $("gpsErr").textContent=""; return; }
+  // try device GPS once, silently; failure is fine — manual pin always available
+  if(!navigator.geolocation){ renderGps(); return; }
+  $("gpsDetail").textContent="Trying phone GPS…";
+  navigator.geolocation.getCurrentPosition(
+    p=>{ if(R.lat==null) setGps("device", p.coords.latitude, p.coords.longitude, p.coords.accuracy||null); },
+    ()=>{ renderGps(); },
+    {enableHighAccuracy:true, timeout:8000, maximumAge:60000});
+}
+$("btnDeviceGps").addEventListener("click",()=>{
+  if(!navigator.geolocation){ $("gpsErr").textContent="This device/browser has no GPS to offer."; return; }
+  $("gpsErr").textContent=""; $("gpsDetail").textContent="Waiting for GPS fix…";
+  navigator.geolocation.getCurrentPosition(
+    p=>{ setGps("device", p.coords.latitude, p.coords.longitude, p.coords.accuracy||null); toast("Phone GPS fix acquired."); },
+    e=>{ $("gpsErr").textContent="GPS unavailable ("+(e.message||"denied")+"). Place the pin manually — reporting still works."; renderGps(); },
+    {enableHighAccuracy:true, timeout:10000});
+});
+$("btnSimGps").addEventListener("click",()=>{
+  // SYNTHETIC fixture for demo environments (labeled as such everywhere)
+  setGps("simulated", 5.9512, 1.0480, 12);
+  toast("Simulated GPS fix placed near Kedzi (synthetic — for demo only).");
+});
+$("pinmap").addEventListener("pointerdown", e=>{
+  const r=$("pinmap").getBoundingClientRect();
+  const x=(e.clientX-r.left)/r.width*400, y=(e.clientY-r.top)/r.height*300;
+  const lon=0.60+x/400*0.80, lat=6.20-y/300*0.50;
+  setGps("manual", +lat.toFixed(6), +lon.toFixed(6), null);
+  $("gpsErr").textContent="";
+});
+
+/* ================================================================
+   STEP 3 — CATEGORY (backend enum) · STEP 5 — ROLE
+================================================================ */
+function tileGroup(elId, attr, cb){
+  const tiles=[...document.querySelectorAll(`#${elId} .tile`)];
+  tiles.forEach(t=>t.addEventListener("click",()=>{
+    tiles.forEach(x=>{x.classList.remove("sel");x.setAttribute("aria-checked","false");});
+    t.classList.add("sel"); t.setAttribute("aria-checked","true"); cb(t.dataset[attr]);
+  }));
+}
+tileGroup("catTiles","cat",v=>{ R.category=v; $("catErr").textContent=""; $("otherWrap").style.display=v==="other"?"block":"none"; });
+tileGroup("roleTiles","role",v=>{ R.reporterType=v; $("roleErr").textContent=""; });
+
+/* ================================================================
+   STEP 4 — DETAILS
+================================================================ */
+$("observedAt").value=toLocalInput(new Date());
+function toLocalInput(d){ const p=n=>String(n).padStart(2,"0"); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; }
+$("desc").addEventListener("input",e=>{ $("charCount").textContent=`${e.target.value.length} / 2000`; $("descErr").textContent=""; });
+$("observedAt").addEventListener("change",()=>$("dateErr").textContent="");
+$("voiceBtn").addEventListener("click",()=>toast("Voice notes are a planned feature — not in this prototype."));
+$("consentBox").addEventListener("change",e=>{ R.consent=e.target.checked; $("consentErr").textContent=""; });
+
+/* ================================================================
+   VALIDATION (mirrors backend schema rules)
+================================================================ */
+function validateStep(n){
+  if(n===0){ return true; } // photo optional by design
+  if(n===1){
+    if(R.lat==null){ $("gpsErr").textContent="Please set a location: use phone GPS, simulate, or tap the map to place the pin."; return false; }
+    if(R.lat<-90||R.lat>90||R.lon<-180||R.lon>180){ $("gpsErr").textContent="Location is out of range — please re-place the pin."; return false; }
+    $("gpsErr").textContent=""; return true;
+  }
+  if(n===2){
+    if(!R.category){ $("catErr").textContent="Please pick one category."; return false; }
+    R.categoryOther=$("catOther").value.trim();
+    if(R.category==="other"&&!R.categoryOther){ $("catErr").textContent="Please describe the “Other” category briefly."; return false; }
+    $("catErr").textContent=""; return true;
+  }
+  if(n===3){
+    R.description=$("desc").value.trim(); R.observedAt=$("observedAt").value;
+    let ok=true;
+    if(!R.observedAt){ $("dateErr").textContent="Please set when you saw it."; ok=false; }
+    else if(new Date(R.observedAt)>new Date()){ $("dateErr").textContent="The date can't be in the future."; ok=false; }
+    else { const yrs=(Date.now()-new Date(R.observedAt))/3.154e10; if(yrs>2) toast("Note: this observation is over 2 years old — reviewers will see a soft warning."); }
+    if(R.description.length<10){ $("descErr").textContent="Please write at least 10 characters."; ok=false; }
+    return ok;
+  }
+  if(n===4){ if(!R.reporterType){ $("roleErr").textContent="Please pick the role that fits best — no name needed."; return false; } return true; }
+  if(n===5){ if(!R.consent){ $("consentErr").textContent="Please tick the consent box to continue."; return false; } return true; }
+  return true;
+}
+
+/* ================================================================
+   STEP 7 — SUMMARY + simulated payload (backend schema v1)
+================================================================ */
+const CAT_LABEL={erosion:"Erosion 🌊",flooding:"Flooding 🌧️",pollution:"Pollution 🗑️",damaged_infrastructure:"Damaged infrastructure 🏚️",drainage_issue:"Drainage issue 🕳️",other:"Other ❓"};
+const ROLE_LABEL={fisherfolk:"Fisherfolk",trader:"Trader",youth:"Youth",community_leader:"Community leader",official:"Official",researcher:"Researcher"};
+function buildPayload(){
+  return {
+    category:R.category,
+    ...(R.category==="other"?{category_other_text:R.categoryOther}:{}),
+    latitude:+R.lat.toFixed(6), longitude:+R.lon.toFixed(6),
+    location_accuracy_m:R.acc==null?null:Math.round(R.acc),
+    location_source:R.gpsSource,                       // client-side provenance (not in server schema)
+    observed_at:new Date(R.observedAt).toISOString(),
+    description:R.description,
+    reporter_type:R.reporterType,
+    photo_ref:R.compressedBlob?`reports/<simulated-uuid>/photo.jpg`:null,
+    photo_bytes:R.compressedBytes||null,              // client-side (not in server schema)
+    source:"community_report",
+    method:`field observation via mobile form, ${R.gpsSource==="exif"?"photo-GPS-tagged":R.gpsSource==="device"?"GPS-tagged":"manual-pin"}`,
+    status:"submitted", visibility:"internal", confidence_tier:"low",
+    _simulated:true, _note:"PROTOTYPE — matches backend/01-DATA-MODEL.md v1 field names; nothing sent anywhere"
+  };
+}
+function renderSummary(){
+  const p=buildPayload();
+  $("summaryList").innerHTML=`
+    <dt>Photo</dt><dd>${R.compressedBlob?`1 photo, ${kb(R.compressedBytes)} (compressed from ${kb(R.originalBytes)})`:"No photo — report without photo"}</dd>
+    <dt>Location</dt><dd>${p.latitude}, ${p.longitude} <span class="kv">(${p.location_source}${p.location_accuracy_m!=null?", ±"+p.location_accuracy_m+" m":""})</span></dd>
+    <dt>Category</dt><dd>${CAT_LABEL[R.category]}${R.category==="other"?" — "+escapeHtml(R.categoryOther):""}</dd>
+    <dt>Observed</dt><dd>${new Date(R.observedAt).toLocaleString()}</dd>
+    <dt>Description</dt><dd>${escapeHtml(R.description)}</dd>
+    <dt>Reporter</dt><dd>${ROLE_LABEL[R.reporterType]} <span class="kv">(role only — no name collected)</span></dd>
+    <dt>Consent</dt><dd>Given ✓</dd>`;
+  $("payloadPre").textContent=JSON.stringify(p,null,2);
+  $("submitBtn").textContent = online ? "Send report" : "Save on phone (offline)";
+}
+const escapeHtml=s=>s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ================================================================
+   OFFLINE OUTBOX — SIMULATION of the store-and-forward design
+   Production: service worker + IndexedDB. Here: in-memory only.
+================================================================ */
+let online=true, flaky=false, syncing=false;
+const outbox=[];
+const BACKOFF=[3000,8000,20000]; // demo-shortened; production: 1m/5m/30m/2h/12h
+const uuid=()=>"xxxxxxxx-xxxx-4xxx".replace(/x/g,()=>(Math.random()*16|0).toString(16))+Date.now().toString(16).slice(-4);
+const fnv=s=>{let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}return h.toString(16);};
+
+function enqueue(payload, label){
+  const clientId=uuid();
+  const item={clientId, dedupKey:clientId.slice(0,8)+"-"+fnv(JSON.stringify(payload)),
+    label:label||CAT_LABEL[payload.category]||"Report",
+    payload, status:"queued", attempts:0, nextRetryAt:0, serverId:null, conflict:false, createdAt:new Date()};
+  outbox.push(item); renderOutbox();
+  toast(online?"Report sent to outbox — syncing…":"Saved on your phone — will send when you have signal.");
+  processQueue();
+  return item;
+}
+function pendingCount(){ return outbox.filter(o=>["queued","uploading","failed","conflict"].includes(o.status)).length; }
+function renderOutbox(){
+  const n=pendingCount(), b=$("pendingBadge");
+  b.textContent=n; b.classList.toggle("zero",n===0);
+  const banner=$("syncBanner");
+  if(n>0){ banner.classList.add("show"); banner.textContent=`⏳ ${n} report${n>1?"s":""} waiting on this phone — ${online?"syncing…":"will send automatically when you have signal."}`; }
+  else banner.classList.remove("show");
+  const list=$("outboxList");
+  if(!outbox.length){ list.innerHTML=`<p class="kv">Outbox is empty. Submit the form above (or inject a test report) to see queueing.</p>`; return; }
+  list.innerHTML=outbox.slice().reverse().map(o=>`
+    <div class="outbox-item">
+      <div class="row"><strong>${escapeHtml(o.label)}</strong><span class="chip ${o.status}">${o.status.toUpperCase()}</span></div>
+      <div class="meta">client <code>${o.clientId.slice(0,13)}…</code> · dedup <code>${o.dedupKey}</code> · attempts ${o.attempts}${o.serverId?` · server <code>${o.serverId}</code>`:""}${o.conflict?` · <b>server-wins — flagged for admin review</b>`:""}</div>
+      ${o.status==="failed"?`<div class="meta">Next retry in ${Math.max(1,Math.round((o.nextRetryAt-Date.now())/1000))}s (backoff ${o.attempts>3?"capped":"step "+Math.min(o.attempts,BACKOFF.length)})</div>`:""}
+      ${o.status==="conflict"?`<div><button class="btn plain" data-resolve="${o.clientId}">Resolve: server wins → admin review</button></div>`:""}
+    </div>`).join("");
+  list.querySelectorAll("[data-resolve]").forEach(btn=>btn.addEventListener("click",()=>{
+    const o=outbox.find(x=>x.clientId===btn.dataset.resolve);
+    o.conflict=false; o.status="resolved";
+    toast("Conflict resolved: server version kept; local version flagged for admin review (simulated).");
+    renderOutbox();
+  }));
+}
+function processQueue(){
+  if(!online||syncing) return;
+  const now=Date.now();
+  const item=outbox.find(o=>o.status==="queued"||(o.status==="failed"&&o.nextRetryAt<=now));
+  if(!item){ renderOutbox(); return; }
+  syncing=true; item.status="uploading"; renderOutbox();
+  setTimeout(()=>{ // simulated network round-trip
+    syncing=false;
+    if(flaky && Math.random()<0.34){
+      item.attempts++;
+      item.status="failed";
+      item.nextRetryAt=Date.now()+BACKOFF[Math.min(item.attempts-1,BACKOFF.length-1)];
+      toast(`Upload failed (simulated) — retry ${item.attempts} scheduled with backoff.`);
+      setTimeout(processQueue, BACKOFF[Math.min(item.attempts-1,BACKOFF.length-1)]+200);
+    } else {
+      item.attempts++;
+      item.status="sent";
+      item.serverId="srv-"+Math.random().toString(36).slice(2,9);
+      toast("Report synced (simulated server id "+item.serverId+").");
+    }
+    renderOutbox(); processQueue();
+  }, 1200);
+}
+setInterval(()=>{ if(online) processQueue(); }, 4000); // reconnect sweep
+
+$("submitBtn").addEventListener("click",()=>{
+  const payload=buildPayload();
+  enqueue(payload);
+  resetForm(); showStep(0);
+  document.getElementById("offlinePanel").scrollIntoView({behavior:"smooth",block:"nearest"});
+});
+function resetForm(){
+  Object.assign(R,{photoFile:null,photoUrl:null,originalBytes:0,compressedBlob:null,compressedBytes:0,exifGps:null,gpsSource:null,lat:null,lon:null,acc:null,category:null,categoryOther:"",description:"",observedAt:toLocalInput(new Date()),reporterType:null,consent:false});
+  $("photoInput").value=""; $("photoPreview").style.display="none"; $("exifNote").style.display="none";
+  document.querySelectorAll(".tile.sel").forEach(t=>{t.classList.remove("sel");t.setAttribute("aria-checked","false");});
+  $("otherWrap").style.display="none"; $("catOther").value=""; $("desc").value=""; $("charCount").textContent="0 / 2000";
+  $("observedAt").value=toLocalInput(new Date()); $("consentBox").checked=false; $("gpsErr").textContent="";
+}
+
+/* Connectivity + demo controls */
+$("netToggle").addEventListener("click",()=>{
+  online=!online;
+  $("netLabel").textContent=online?"Online":"Offline";
+  $("netToggle").classList.toggle("off",!online);
+  $("netToggle").setAttribute("aria-pressed",String(online));
+  toast(online?"Back online — syncing outbox…":"Offline mode — new reports will queue on this phone.");
+  if(online) processQueue(); renderOutbox();
+});
+$("btnFlaky").addEventListener("click",()=>{
+  flaky=!flaky;
+  $("btnFlaky").textContent="Flaky network: "+(flaky?"ON":"OFF");
+  $("btnFlaky").setAttribute("aria-pressed",String(flaky));
+});
+$("btnSyncNow").addEventListener("click",()=>{ if(!online){ toast("Still offline — nothing to sync yet."); return; } processQueue(); });
+$("btnInject").addEventListener("click",()=>{
+  // clearly-labeled synthetic fixture
+  enqueue({category:"erosion",latitude:5.9501,longitude:1.0472,location_accuracy_m:18,location_source:"simulated",
+    observed_at:new Date().toISOString(),description:"[SYNTHETIC FIXTURE] Test report injected from the demo panel.",
+    reporter_type:"youth",source:"community_report",method:"synthetic fixture",_simulated:true},"Erosion 🌊 (synthetic)");
+});
+$("btnConflict").addEventListener("click",()=>{
+  const o=[...outbox].reverse().find(x=>["queued","failed","sent"].includes(x.status));
+  if(!o){ toast("Nothing to conflict with — inject or submit a report first."); return; }
+  o.conflict=true; o.status="conflict";
+  toast("Simulated: server holds a different version. Local copy kept; flagged for admin review.");
+  renderOutbox();
+});
+renderOutbox();
+</script>
+</body>
+</html>

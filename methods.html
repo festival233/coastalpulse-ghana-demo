@@ -1,4 +1,9 @@
 <!DOCTYPE html>
+<!--
+  License — CC BY 4.0
+  © 2026 Street Pulse Foundation Inc. Licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/).
+  Attribution: Street Pulse Foundation / StreetPulse Blue — CoastalPulse Ghana.
+-->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -27,6 +32,10 @@
   th,td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
   th{background:#eef1f4}
   .lim{background:#fff8e6;border:1px solid #e3b341;border-radius:8px;padding:10px 12px;font-size:13px;margin:10px 0}
+  .provbox{background:#eef4ff;border:1px solid #0969da;border-radius:8px;padding:10px 12px;font-size:13px;margin:10px 0}
+  .provbox table{border:0;font-size:13px;margin:4px 0}
+  .provbox th,.provbox td{border:0;border-bottom:1px solid #d0d7de;padding:5px 6px;background:transparent}
+  .provbox th{width:190px;color:#0b2a4a}
   .no{color:#b42318;font-weight:700}
   a{color:var(--open)}
   footer{max-width:780px;margin:0 auto;padding:10px 18px 26px;font-size:12px;color:var(--mut)}
@@ -44,6 +53,18 @@
 <section>
 <h2>What this analysis is</h2>
 <p>An indicative, satellite-derived measurement of shoreline change along the open sandy coast of Keta, Ghana (Keta town frontage + Kedzi coastal strip). It is labeled <b>PUBLIC-OPEN DATA</b>: produced by our analysis of open Copernicus Sentinel-2 imagery — not a field measurement, not survey-grade. It is one input layer of the CoastalPulse Ghana prototype, not a finished product.</p>
+<div class="provbox">
+<b>Provenance — shoreline-change layer</b> <span class="badge b-open">PUBLIC-OPEN DATA</span> <span class="badge b-ind">INDICATIVE</span> <span class="badge b-fvp">⚠ FIELD VALIDATION PENDING</span>
+<table>
+<tr><th>SOURCE</th><td>Copernicus Sentinel-2 L2A (10 m), Copernicus / ESA — discovery via Element84 Earth Search STAC / AWS Open Data (<code>sentinel-2-l2a</code>); transect baseline: OpenStreetMap coastline (ODbL). Attribution: contains modified Copernicus Sentinel data (ESA), 2017 &amp; 2024–2025; © OpenStreetMap contributors.</td></tr>
+<tr><th>DATE</th><td>Analysis 2026-10-04; automated 5-stage pipeline re-run verified byte-identical 2026-10-05. Imagery composite mid-dates: 2017-03-07 → 2025-01-07 (7.84 yr).</td></tr>
+<tr><th>METHOD</th><td>Pixel-wise median-NDWI waterlines per period; 106 shore-normal transects at 100 m spacing along the open sandy coast (lon 0.997–1.052); rate = waterline displacement / 7.84 yr. Full record: <code>earth-engine/METHODS.md</code>.</td></tr>
+<tr><th>CONFIDENCE</th><td><b>INDICATIVE</b> — per <code>CONFIDENCE-FRAMEWORK.md</code> §3 (per-transect uncertainty ~±2.5 m/yr exceeds the median signals; default ceiling for satellite-derived layers without ground truth).</td></tr>
+<tr><th>UNCERTAINTY</th><td>±1 m/yr noise floor (empirical 5-day scene-pair check: mean-abs displacement 14.9 m); ~±2.5 m/yr per-transect method uncertainty (10 m pixels over 7.84 yr); rates within ±1 m/yr are treated as noise.</td></tr>
+<tr><th>FIELD VALIDATION STATUS</th><td><b>FIELD VALIDATION PENDING</b> — no GPS shoreline survey, no tide-gauge correction; no ground truth for the displayed rates.</td></tr>
+<tr><th>LAST UPDATED</th><td>2026-10-05 (Prototype v0.2.1).</td></tr>
+</table>
+</div>
 </section>
 
 <section>
@@ -139,6 +160,19 @@
 
 <p><b>Framing (read first):</b> this layer measures <b>indicative co-event water extent versus normal-condition extent</b> — it is <b>not</b> "surge-only" flood extent. On this ~1 m micro-tidal coast, storm surge, high tide, and normal waterline variability cannot be separated from this data, and no attempt is made to separate them. Flooded area is reported <b>as a range only</b> (sensitivity sweep — never a point estimate). <b>No depth estimates, ever.</b> Nothing here is framed or suitable for compensation, resettlement, insurance, or engineering use. No ground truth exists for this event.</p>
 
+<div class="provbox">
+<b>Provenance — historical flood-extent layer (2021-11-07 Keta event)</b> <span class="badge b-open">PUBLIC-OPEN DATA</span> <span class="badge b-ind">INDICATIVE</span> <span class="badge b-fvp">⚠ FIELD VALIDATION PENDING</span>
+<table>
+<tr><th>SOURCE</th><td>Copernicus Sentinel-1 IW GRD (C-band SAR, 10 m), Copernicus / ESA — AWS Open Data <code>sentinel-s1-l1c</code> / Element84 Earth Search STAC (<code>sentinel-1-grd</code>). Exposure overlays: WorldPop Ghana 2020 (100 m constrained, CC-BY-4.0); Microsoft Global ML Building Footprints, 2026-08-13 refresh (CDLA-Permissive-2.0); Copernicus DEM GLO-30 (≤12 m lowland mask only). Community verification via OSM Nominatim place nodes.</td></tr>
+<tr><th>DATE</th><td>Analysis 2026-10-04/05. Event: 2021-11-07. Co-event scene Sentinel-1B 2021-11-08 18:09 UTC (+1 day, relative orbit 74); reference S1B 2021-10-15 (same satellite, orbit, geometry); quiet-pair S1A 2021-10-21.</td></tr>
+<tr><th>METHOD</th><td>SAR ΔVV change detection vs union-of-October-2021 normal-condition water mask; <b>−2 / −3 / −4 dB threshold sweep</b>; DEM ≤12 m lowland mask; 3×3 morphological opening; minimum 50 px (0.5 ha) connected components; VH cross-polarization QA. Full record: <code>earth-engine/FLOOD-METHODS.md</code>.</td></tr>
+<tr><th>CONFIDENCE</th><td><b>INDICATIVE</b> — per <code>CONFIDENCE-FRAMEWORK.md</code> §3 (threshold-sensitive with no ground truth to anchor the threshold; default ceiling for unvalidated satellite layers).</td></tr>
+<tr><th>UNCERTAINTY</th><td>Threshold-sensitive: 30.8–65.9 ha across the −2/−3/−4 dB sweep (~2× variation — always a range, never a point estimate); ≈ ±40 m absolute polygon placement uncertainty (relative co-registration 0.00 px); quiet-pair no-flood floor 0–2.3 ha.</td></tr>
+<tr><th>FIELD VALIDATION STATUS</th><td><b>FIELD VALIDATION PENDING</b> — no field-mapped flood extents, no surveyed water levels, and no tide-gauge validation exist for this event.</td></tr>
+<tr><th>LAST UPDATED</th><td>2026-10-05 (Prototype v0.2.1).</td></tr>
+</table>
+</div>
+
 <h3>Satellite data sources</h3>
 <ul>
   <li><b>Sensor:</b> Sentinel-1 IW GRD (C-band SAR, 10 m), Copernicus / ESA.</li>
@@ -165,7 +199,7 @@
   <tr><td>−4 dB</td><td>30.8 ha</td><td>22</td><td>0.0 ha</td><td>88%</td></tr>
 </table>
 <p><b>Indicative co-event water extent versus normal-condition extent: 30.8–65.9 ha (0.31–0.66 km²), reported as a range.</b> The empirical no-flood floor (same pipeline on 2021-10-21 vs 2021-10-15, no event between) is 0–2.3 ha: the event signal stands 19–29× above normal change variability at −3/−4 dB.</p>
-<p><b>Spatial character:</b> flood polygons ring the Keta Lagoon margins (median 32 m from the October normal-condition water edge; median 2.3 km from the ocean waterline) — <b>lagoon-margin expansion, not open-beach shift</b>. Largest polygon 13.9 ha, lagoon south shore near Kedzi.</p>
+<p><b>Spatial character:</b> flood polygons ring the Keta Lagoon margins (median 32 m from the October normal-condition water edge; median 2.3 km from the ocean waterline) — <b>lagoon-margin expansion, not open-beach shift</b>. Largest polygon 12.07 ha at −3 dB (verified against shipped GeoJSON 2026-10-05), lagoon south shore near Kedzi.</p>
 <p><b>Optical cross-check (opportunistic):</b> nearest clear post-event Sentinel-2 scene 2021-11-14 — NDWI anomaly <b>+0.373 inside</b> the polygons vs <b>−0.027</b> dry-land background (7 days post-event; supporting evidence, not validation).</p>
 
 <h3>Exposure (indicative)</h3>
@@ -198,6 +232,18 @@
   <li><b>The community reporting interface is a prototype with no backend.</b> Demo submissions stay in the browser session only; nothing is transmitted or stored.</li>
   <li>No AI / machine-learning analysis is built or implied.</li>
 </ul>
+<div class="provbox">
+<b>Provenance — demonstration elements (illustrative, not measurements)</b> <span style="display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;color:#fff;margin:1px 2px;background:#9a6700">DEMONSTRATION</span>
+<table>
+<tr><th>SOURCE</th><td>Illustrative positions and scores assigned inside the prototype — not observations, not survey data.</td></tr>
+<tr><th>DATE</th><td>Prototype interface built 2026-10-04/05 (v0.2.1).</td></tr>
+<tr><th>METHOD</th><td>Pollution points are invented positions; 1–5 risk scores are assigned from documented hazard facts (see <code>index.html</code> methods table); the reporting form is an interface mockup.</td></tr>
+<tr><th>CONFIDENCE</th><td>Not rated — <b>DEMONSTRATION</b> content by design, never to be cited as data.</td></tr>
+<tr><th>UNCERTAINTY</th><td>Not applicable — these are interface illustrations, not measurements.</td></tr>
+<tr><th>FIELD VALIDATION STATUS</th><td>Not applicable — demonstration elements are replaced by real field data in the pilot, not validated.</td></tr>
+<tr><th>LAST UPDATED</th><td>2026-10-05 (Prototype v0.2.1).</td></tr>
+</table>
+</div>
 </section>
 
 <section>

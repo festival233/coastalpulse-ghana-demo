@@ -1,16 +1,19 @@
 # CoastalPulse Ghana
 
-**Public Prototype v0.1 — not field-deployed.**
+**Public Prototype v0.2.1 — not field-deployed.**
 
 CoastalPulse Ghana is a prototype initiative of StreetPulse Blue, a program of
-Street Pulse Foundation.
+Street Pulse Foundation, building a **repeatable coastal intelligence system**:
+combining satellite, environmental and community data to understand changing
+coastal risk across hazards — erosion, flooding, water quality and plastic
+pollution.
 
-CoastalPulse Ghana is a **prototype**: a coastal data and community
-conservation concept for Ghana's Volta coastline and the Keta Lagoon area. It
-is not an operating program. This repository exists to support grant
-applications and partner demonstrations — it is not field-deployed, no
-community engagement has taken place yet, and nothing in this prototype
-represents a published research product.
+CoastalPulse Ghana is a **prototype**: a working technical demo for Ghana's
+Volta coastline and the Keta Lagoon area, not an operating program. This
+repository exists to support grant applications and partner demonstrations —
+it is not field-deployed, no community engagement has taken place yet, field
+validation is still pending, and nothing in this prototype represents a
+published research product.
 
 ## Organization
 
@@ -32,6 +35,14 @@ represents a published research product.
 - **Transects** (`earth-engine/data/shoreline_change_transects.geojson`) —
   per-transect shoreline-change rates computed from the two shoreline
   positions. Findings are summarized in the methods page (see below).
+- **Historical flood-extent analysis**
+  (`earth-engine/data/flood_extent_2021-11.geojson`) — indicative co-event
+  water extent versus normal-condition extent for the 2021-11-07 Keta event
+  (Sentinel-1 SAR change detection; 31 polygons; 30.8–65.9 ha across the
+  −2/−3/−4 dB threshold sweep). Framed as INDICATIVE, field validation
+  pending. The first entry in a planned multi-event flood library — not a
+  one-off map. See `methods.html` (flood section) and
+  `earth-engine/FLOOD-METHODS.md`.
 - **Reporting prototype** — the site includes example report content to
   demonstrate the format of a future field-reporting flow.
 - **Dashboard concept** — `index.html` is a front-end concept showing how the
@@ -43,6 +54,10 @@ represents a published research product.
 - **Copernicus Sentinel-2 L2A** satellite imagery, accessed via the
   Element84 Earth Search STAC API and AWS Open Data
   (`https://earth-search.aws.element84.com/v1`).
+- **Copernicus Sentinel-1 IW GRD** SAR imagery (flood analysis), accessed via
+  the Element84 Earth Search STAC API and the AWS Open Data
+  `sentinel-s1-l1c` bucket. WorldPop Ghana 2020, Microsoft Global ML Building
+  Footprints, Copernicus DEM GLO-30 (exposure overlays only).
 - **OpenStreetMap** — baseline coastline and lagoon boundary vectors
   (`data/coastline_osm.json`, `data/lagoon_osm.json`).
 - **Keta Lagoon Ramsar boundary** — shown for reference.
@@ -93,6 +108,7 @@ earth-engine/data/
   shoreline_early_median.geojson — 2017-03-07 median shoreline
   shoreline_late_median.geojson  — 2025-01-07 median shoreline
   shoreline_change_transects.geojson — per-transect change rates
+  flood_extent_2021-11.geojson — indicative flood extent, 2021-11-07 event (Sentinel-1)
 ```
 
 To run locally for development, serve the repository root with any static

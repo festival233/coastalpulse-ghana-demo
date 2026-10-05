@@ -1,3 +1,8 @@
+> **License — CC BY 4.0**
+>
+> © 2026 Street Pulse Foundation Inc. Licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/).
+> Attribution: Street Pulse Foundation / StreetPulse Blue — CoastalPulse Ghana.
+
 # FLOOD-METHODS.md — Historical flood analysis: 2021-11-07 Keta event
 
 CoastalPulse Ghana · earth-engine workstream · produced 2026-10-05
@@ -109,7 +114,7 @@ signal stands 19–29× above normal change variability at −3/−4 dB.
 Flood polygons ring the **Keta Lagoon margins** (median 32 m from the October
 union-water edge; median 2.3 km from the v0.1 2024–2025 median *ocean*
 waterline — i.e., this is lagoon-margin expansion, not open-beach waterline
-shift). Largest polygon 13.9 ha at (0.9758, 5.8956), lagoon south shore near
+shift). Largest polygon 12.07 ha at −3 dB (verified against shipped GeoJSON 2026-10-05; an earlier draft figure of 13.9 ha was incorrect), lagoon south shore near
 Kedzi. Cross-check against the v0.1 long-term median waterline: polygons lie
 landward of it on normally-dry land per the union mask definition.
 
@@ -263,3 +268,28 @@ Ship conditions: keep the "indicative co-event water extent" label verbatim,
 always show the 30.8–65.9 ha range (never a point estimate), never attach it
 to compensation/resettlement/engineering narratives, and link this methods
 document from the layer.
+
+## 10. Flood event library — gating log (2026-10-05)
+
+Per the founder directive ("only defensible events, 3 strong > 10 weak"),
+four additional documented Keta flood events were researched and satellite-
+gated (Element84 Earth Search STAC, `sentinel-1-grd`, same AOI; co-event
+scene within ±3 days **and at/after documented onset**; same-orbit reference
+12–24 days prior; quiet-pair scene; bar = CLEARLY pass):
+
+- **2017-06-11** — FAIL: only in-window scene (2017-06-08) predates the
+  documented Jun 10–11 onset; next acquisition +9d, outside gate.
+- **2022-03-03** — FAIL: scene 2022-03-02 18:10 UTC is ~10 h before the
+  documented ~04:30 flooding; event date itself approximate (source weekday
+  inconsistent with calendar).
+- **2022-04-03** — FAIL: no scene within ±3d (nearest +4d; gate not bent).
+- **2025-02/03 episode** — FAIL: recurrent Jan–Mar 2025 episode, onset
+  ambiguous; the 2025-02-26 scene cannot be shown to be post-onset.
+
+Seven further documented events were rejected without gating (pre-Sentinel-1;
+outside the analysis AOI; single-source/uncorroborated; or month-level date
+only). **Result: NULL — no additional event clearly passes; nothing was
+built.** The Nov 2021 event above remains the library's only gated event.
+Full research, per-candidate scene lists, and re-gating notes:
+`FLOOD-EVENT-LIBRARY-GATING.md`; machine record: `flood_event_gating.json`;
+gating script: `gate_flood_events.py`.
