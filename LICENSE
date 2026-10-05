@@ -1,0 +1,41 @@
+CoastalPulse Ghana Prototype Demo — Licensing Notice
+
+Copyright (c) 2026 Street Pulse Foundation Inc.
+All rights reserved unless specifically stated otherwise.
+
+This repository contains the CoastalPulse Ghana prototype demo, a project of
+StreetPulse Blue, a program of Street Pulse Foundation ("the Foundation").
+
+CORE APPLICATION / PLATFORM CODE: This repository and the CoastalPulse Ghana
+application/platform code it contains are NOT released under MIT, Apache,
+GPL, AGPL, or any other broad open-source license. All rights to the core
+application and platform code are retained by Street Pulse Foundation Inc.
+
+PUBLIC VIEWABILITY IS NOT A REUSE LICENSE: This repository is publicly
+viewable. Public viewability does not authorize unrestricted reuse of the
+platform code. (As with all public repositories on GitHub, GitHub's own Terms
+of Service allow users to view and fork a public repository through GitHub's
+platform features; that platform-level permission is not a copyright license
+granting you the right to reuse, redistribute, modify, or build on the code
+in this repository outside of GitHub's Terms.)
+
+If you wish to reuse, redistribute, modify, or build on this code — including
+for research, grant work, or commercial purposes — you must first obtain
+written permission from Street Pulse Foundation Inc.
+
+Contact: info@streetpulsefoundation.org
+
+THIRD-PARTY DATA AND MATERIAL: Third-party data, imagery, and software
+referenced or included in this repository remain under their own licenses
+and terms. In particular:
+
+- Copernicus Sentinel satellite data is free, full and open under the
+  applicable Copernicus data terms and remains subject to ESA attribution
+  requirements. See README.md and LICENSING.md.
+- OpenStreetMap data remains © OpenStreetMap contributors, available under
+  the Open Database License (ODbL). See README.md and LICENSING.md.
+- Map tiles and basemap services shown in the demo are subject to their
+  providers' terms of use.
+
+The Foundation claims no copyright over third-party data and materials, and
+nothing in this notice relicenses them.

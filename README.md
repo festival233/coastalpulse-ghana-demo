@@ -102,23 +102,49 @@ requests to the GeoJSON files work over `http://localhost`; opening via
 
 ## License
 
-**License status: to be determined — founder decision pending.**
+**Copyright retained by Street Pulse Foundation Inc. All rights reserved
+unless specifically stated otherwise.**
 
-No license has been selected for this repository yet. This project is
-**not** claimed to be open source until a license is chosen and applied.
+This repository contains the CoastalPulse Ghana prototype demo. The core
+application / platform code in this repository is **not** released under MIT,
+Apache, GPL, AGPL, or any other broad open-source license. Public viewability
+of this repository and demo does **not** authorize unrestricted reuse of the
+platform code — see `LICENSE` at the repository root.
 
-> **FOUNDER DECISION NEEDED:** select a license for the CoastalPulse Ghana
-> prototype repository.
+Third-party data and materials included in or referenced by this repository
+remain under their own licenses and terms (see "Data licenses and
+attribution" below and `LICENSING.md`). Nothing here relicenses third-party
+data.
+
+See `LICENSING.md` for the per-asset licensing position. Per-asset licensing
+recommendations that are still awaiting founder approval are documented in
+`LICENSE-RECOMMENDATIONS.md` — they are recommendations only and have not
+been applied.
 
 ## Data licenses and attribution
+
+Verified 2026-10-04. These third-party sources remain under their own
+licenses; nothing in this repository relicenses them.
 
 - **ESA Copernicus Sentinel data:** Contains modified Copernicus Sentinel
   data (2017, 2025). Copernicus data is free, full and open under the
   applicable Copernicus data terms; use of this imagery is subject to the
-  ESA attribution requirements.
-- **OpenStreetMap:** baseline vectors © OpenStreetMap contributors,
-  available under the Open Database License (ODbL).
-- **Derived shoreline vectors and transects** are this project's analysis of
-  the open data above, produced by StreetPulse Blue (a program of Street
-  Pulse Foundation), and carry the limitations described under "Prototype
-  limitations".
+  ESA attribution requirements. Attribution is shown in `methods.html` and
+  on the map layer attributions in `index.html` (EOX Sentinel-2 cloudless
+  layer, which itself notes "modified Copernicus Sentinel data, ESA").
+- **OpenStreetMap:** baseline vectors and map tiles © OpenStreetMap
+  contributors, available under the Open Database License (ODbL). Attributed
+  in `index.html` tile layer controls and `methods.html`.
+- **EOX tile services:** Sentinel-2 cloudless and terrain tiles are
+  attributed in `index.html`; SRTM-derived terrain is elevation context only,
+  not a flood-risk model.
+- **Keta Lagoon Ramsar boundary:** shown for reference.
+
+**Derived shoreline vectors and transects**
+(`earth-engine/data/shoreline_early_median.geojson`,
+`shoreline_late_median.geojson`, `shoreline_change_transects.geojson`) are
+this project's analysis of the open data above, produced by StreetPulse Blue
+(a program of Street Pulse Foundation), and carry the limitations described
+under "Prototype limitations". Their license is **to be determined**
+per-dataset — see `LICENSING.md` and the recommendations in
+`LICENSE-RECOMMENDATIONS.md` (pending founder approval).
