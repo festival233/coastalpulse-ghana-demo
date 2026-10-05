@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CoastalPulse Ghana — Public Prototype v0.2 (Keta, Ghana)</title>
+<title>CoastalPulse Ghana — Public Prototype v0.2.1 (Keta, Ghana)</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
   :root{
@@ -18,6 +18,8 @@
   .badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;color:#fff;margin:1px 2px}
   .b-real{background:var(--real)} .b-open{background:var(--open)}
   .b-demo{background:var(--demo)} .b-planned{background:var(--planned)}
+  .b-ind{background:transparent;border:1.5px solid var(--mut);color:var(--mut)}
+  .b-fvp{background:transparent;border:1.5px dashed var(--demo);color:var(--demo)}
   .verstrip{background:#12355c;color:#fff;border-top:2px solid #e3b341;padding:6px 14px;font-size:12px;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center}
   .verstrip .vname{font-weight:800}
   .verstrip .q{color:#ffd98a;font-weight:600}
@@ -38,6 +40,8 @@
   .score{font-size:26px;font-weight:800}
   .meter{height:8px;border-radius:4px;background:#e7ebef;overflow:hidden;margin:6px 0}
   .meter>div{height:100%}
+  .prov{font-size:11px;color:var(--mut);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px;margin-top:8px;line-height:1.55}
+  .prov b{color:var(--ink)}
   label{font-size:12px;font-weight:600;display:block;margin:8px 0 3px}
   input[type=text],select,textarea{width:100%;padding:8px;border:1px solid var(--line);border-radius:6px;font-size:13px}
   textarea{min-height:70px}
@@ -52,6 +56,7 @@
   footer{font-size:11px;color:var(--mut);padding:8px 14px;border-top:1px solid var(--line);background:#fff}
   footer a{color:var(--open)}
   .warn{background:#fff8e6;border:1px solid #e3b341;border-radius:8px;padding:8px;font-size:12px;margin:8px 0}
+  .framing{background:#eef4ff;border:1px solid #0969da;border-radius:8px;padding:8px;font-size:12px;margin:8px 0}
   @media (max-width:760px){ #wrap{flex-direction:column;height:auto} #map{height:55vh} aside{width:100%;max-width:none;border-left:0;border-top:1px solid var(--line)} }
 </style>
 </head>
@@ -59,17 +64,19 @@
 <header>
   <div>
     <h1>CoastalPulse Ghana <span class="badge b-demo">INTERFACE PROTOTYPE</span></h1>
-    <div class="sub">StreetPulse Blue · CoastalPulse Ghana · Public Prototype v0.2 — proposed Keta Lagoon pilot, Volta Region, Ghana · Not yet field-deployed</div>
+    <div class="sub">StreetPulse Blue · CoastalPulse Ghana · Public Prototype v0.2.1 — proposed Keta Lagoon pilot, Volta Region, Ghana · Not yet field-deployed</div>
   </div>
   <div style="margin-left:auto">
     <span class="badge b-real">REAL DATA</span>
     <span class="badge b-open">PUBLIC-OPEN DATA</span>
+    <span class="badge b-ind">INDICATIVE</span>
+    <span class="badge b-fvp">⚠ FIELD VALIDATION PENDING</span>
     <span class="badge b-demo">DEMONSTRATION DATA</span>
     <span class="badge b-planned">PLANNED FUTURE FIELD DATA</span>
   </div>
 </header>
 <div class="verstrip">
-  <span class="vname">CoastalPulse Ghana — Prototype v0.2</span>
+  <span class="vname">CoastalPulse Ghana — Prototype v0.2.1</span>
   <span class="sep">·</span><span class="q">Prototype</span>
   <span class="sep">·</span><span class="q">Not yet field-deployed</span>
   <span class="sep">·</span><span class="q">Public/open-data analysis</span>
@@ -82,8 +89,8 @@
       <h2 style="margin:0 0 6px;font-size:15px">Overview — CoastalPulse Ghana <span class="badge b-open">PUBLIC PROTOTYPE</span></h2>
       <p style="margin:4px 0;font-size:13px"><b>The problem:</b> Keta's coastal communities face erosion, flooding and environmental-information gaps.</p>
       <p style="margin:4px 0;font-size:13px"><b>The solution:</b> CoastalPulse Ghana combines satellite analysis, geospatial intelligence and future community-generated environmental observations into one coastal resilience platform.</p>
-      <p style="margin:4px 0;font-size:13px"><b>What works today:</b> interactive Keta/Kedzi mapping · satellite-derived shoreline analysis · 2017–2025 shoreline comparison · per-transect erosion/accretion analysis · community-reporting interface <i>(prototype)</i> · environmental-risk dashboard <i>(concept)</i>.</p>
-      <p style="margin:4px 0;font-size:13px"><b>What funding enables next:</b> local community co-design · GPS field validation · historical/current flood analysis · water-quality field monitoring · plastic-pollution mapping · community reporting backend · environmental sensors where justified.</p>
+      <p style="margin:4px 0;font-size:13px"><b>What works today:</b> interactive Keta/Kedzi mapping · satellite-derived shoreline analysis · 2017–2025 shoreline comparison · per-transect erosion/accretion analysis · <b>indicative historical flood-extent layer (2021-11-07 Keta event)</b> · community-reporting interface <i>(prototype)</i> · environmental-risk dashboard <i>(concept)</i>.</p>
+      <p style="margin:4px 0;font-size:13px"><b>What funding enables next:</b> local community co-design · GPS field validation · real-time flood monitoring · water-quality field monitoring · plastic-pollution mapping · community reporting backend · environmental sensors where justified.</p>
     </div>
     <button class="ghost" id="overview-close" style="width:auto;margin-top:0;padding:4px 12px;white-space:nowrap" aria-label="Hide overview">Hide ✕</button>
   </div>
@@ -103,6 +110,7 @@
       <h3>Map layers — every layer is labeled</h3>
       <div id="layerlist"></div>
       <div class="warn"><b>How to read this map:</b> green = processed by us from open sources · blue = third-party open datasets · amber = illustrative/sample only · purple = roadmap, not data. Nothing here is a live sensor feed or field measurement.</div>
+      <div class="framing"><b>Measured layers</b> (shoreline change, flood extent) wear <span class="badge b-open">PUBLIC-OPEN DATA</span> <span class="badge b-ind">INDICATIVE</span> <span class="badge b-fvp">⚠ FIELD VALIDATION PENDING</span> — real satellite measurements, but indicative-grade until GPS field validation. See the Dashboard for per-metric provenance.</div>
     </div>
 
     <div class="pane" id="pane-report">
@@ -126,12 +134,25 @@
 
     <div class="pane" id="pane-dash">
       <h3>Evidence Dashboard <span class="badge b-open">MEASURED · PUBLIC-OPEN DATA</span></h3>
-      <p>Real computed metrics from the satellite shoreline-change analysis (2017-03-07 → 2025-01-07, 7.84 yr, 106 transects). Every number below was computed from <code>earth-engine/data/shoreline_change_transects.geojson</code> — not estimated. Method and limitations: Methods tab · <a href="methods.html">methods.html</a>.</p>
+      <p>Real computed metrics from two satellite analyses. Every number below was computed from a GeoJSON in <code>earth-engine/data/</code> — not estimated. Every card carries its <b>SOURCE, DATE, METHOD, CONFIDENCE and FIELD VALIDATION STATUS</b>. Method and limitations: Methods tab · <a href="methods.html">methods.html</a>.</p>
+
+      <h3>Shoreline change, 2017 → 2025 <span class="badge b-open">PUBLIC-OPEN DATA</span> <span class="badge b-ind">INDICATIVE</span> <span class="badge b-fvp">⚠ FIELD VALIDATION PENDING</span></h3>
+      <p>Satellite-derived shoreline-change analysis (2017-03-07 → 2025-01-07, 7.84 yr, 106 transects) from <code>earth-engine/data/shoreline_change_transects.geojson</code>.</p>
       <div id="evcards"></div>
+
+      <hr style="border:0;border-top:2px solid var(--line);margin:16px 0">
+      <h3>Historical flood — 2021-11-07 Keta event <span class="badge b-open">PUBLIC-OPEN DATA</span> <span class="badge b-ind">INDICATIVE</span> <span class="badge b-fvp">⚠ FIELD VALIDATION PENDING</span></h3>
+      <div class="framing"><b>Mandatory framing:</b> what this layer measures is <b>indicative co-event water extent versus normal-condition extent</b> — never "surge-only" flood extent. Storm surge, high tide, and normal waterline variability cannot be separated from this data. Extent is always a <b>range across the −2/−3/−4 dB threshold sweep</b>, never a point estimate. No depth estimates. From <code>earth-engine/data/flood_extent_2021-11.geojson</code> (31 polygons, −3 dB).</div>
+      <div id="floodcards"></div>
+
       <div class="card">
         <b>Open datasets integrated</b>
         <ul style="padding-left:18px;margin:6px 0">
           <li>Copernicus Sentinel-2 L2A imagery via Element84 Earth Search STAC / AWS Open Data (shoreline-analysis input; contains modified Copernicus Sentinel data, ESA)</li>
+          <li>Copernicus Sentinel-1 IW GRD via AWS Open Data (sentinel-s1-l1c) / Element84 Earth Search STAC (flood-analysis input; contains modified Copernicus Sentinel data, ESA)</li>
+          <li>WorldPop Ghana 2020, 100 m constrained (maxar_v1), CC-BY-4.0 — population exposure overlay (via HDX)</li>
+          <li>Microsoft Global ML Building Footprints, 2026-08-13 refresh, CDLA-Permissive-2.0 — building exposure overlay</li>
+          <li>Copernicus DEM GLO-30 — coarse ≤12 m lowland mask only (never depth)</li>
           <li>OpenStreetMap — base map, coastline geometry, community coordinates (ODbL)</li>
           <li>Keta Lagoon boundary — OpenStreetMap relation 6270737 (Keta Lagoon is Ramsar Site #567)</li>
         </ul>
@@ -144,29 +165,31 @@
 
     <div class="pane" id="pane-methods">
       <h3>Methods &amp; data honesty</h3>
-      <div class="card">📄 <b>Plain-language methods page:</b> <a href="methods.html">methods.html</a> — full detail on the satellite shoreline-change analysis (data sources, method, results, and known limitations — limitations are not hidden).</div>
+      <div class="card">📄 <b>Plain-language methods page:</b> <a href="methods.html">methods.html</a> — full detail on the satellite shoreline-change and flood analyses (data sources, methods, results, and known limitations — limitations are not hidden). Full technical records: <code>earth-engine/METHODS.md</code> (shoreline), <a href="earth-engine/FLOOD-METHODS.md"><code>earth-engine/FLOOD-METHODS.md</code></a> (flood).</div>
       <table id="methodstable">
-        <tr><th>Layer / element</th><th>Label</th><th>Source</th><th>What it is / is not</th></tr>
+        <tr><th>Layer / element</th><th>Labels</th><th>Source</th><th>What it is / is not</th></tr>
       </table>
       <h3>What this prototype does NOT contain</h3>
       <ul>
         <li>No live sensors or sensor feeds of any kind.</li>
         <li>No AI / machine-learning analysis — none is built or implied.</li>
         <li>No community-submitted data — the reporting form is an interface mockup; the demo log is illustrative.</li>
-        <li>No field measurements by Street Pulse Foundation. Satellite-derived shoreline change is computed from open archives (indicative, not survey-grade — see Methods); ground-truth field validation is still pending.</li>
+        <li>No field measurements by Street Pulse Foundation. Satellite-derived shoreline change and flood extent are computed from open archives (indicative, not survey-grade — see Methods); ground-truth field validation is still pending.</li>
+        <li>No flood-depth estimates and no validated flood extents — the flood layer is indicative co-event water extent versus normal-condition extent.</li>
         <li>No claim of community participation, partnership, or willingness anywhere. "Proposed pilot location" wording is used throughout.</li>
       </ul>
       <h3>Roadmap (not built)</h3>
-      <p><span class="badge b-planned">PLANNED FUTURE FIELD DATA</span> — community water-quality transects, plastic transect surveys, deployed environmental sensors, AI-assisted imagery analysis, predictive erosion/flood analytics, fisheries intelligence module.</p>
+      <p><span class="badge b-planned">PLANNED FUTURE FIELD DATA</span> — community water-quality transects, plastic transect surveys, deployed environmental sensors, AI-assisted imagery analysis, predictive erosion/flood analytics, real-time flood monitoring, fisheries intelligence module.</p>
     </div>
   </aside>
 </div>
 
 <footer>
-  CoastalPulse Ghana is a prototype initiative of StreetPulse Blue, a program of Street Pulse Foundation. Public Prototype v0.2 — not yet field-deployed, field validation planned. Map: © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a> (ODbL) · Satellite: EOX IT Services / Sentinel-2 cloudless (contains modified Copernicus Sentinel data, ESA) · Library: <a href="https://leafletjs.com" target="_blank">Leaflet</a>. Full sources in Methods tab · <a href="methods.html">Plain-language methods page</a>.
+  CoastalPulse Ghana is a prototype initiative of StreetPulse Blue, a program of Street Pulse Foundation. Public Prototype v0.2.1 — not yet field-deployed, field validation planned. Map: © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a> (ODbL) · Satellite: EOX IT Services / Sentinel-2 cloudless (contains modified Copernicus Sentinel data, ESA) · Library: <a href="https://leafletjs.com" target="_blank">Leaflet</a> · Projection: <a href="https://github.com/proj4js/proj4js" target="_blank">proj4js</a>. Full sources in Methods tab · <a href="methods.html">Plain-language methods page</a>.
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.2/proj4.js"></script>
 <script>
 /* ============ DATA (all sources documented in Methods) ============ */
 // Communities: coordinates from Nominatim / OpenStreetMap search, retrieved 2026-10-04 (PUBLIC-OPEN DATA, ODbL)
@@ -250,13 +273,14 @@ DEMO_POLLUTION.forEach(p=>{
     .addTo(demoGroup);
 });
 
-/* ============ SHORELINE-CHANGE LAYERS (PUBLIC-OPEN DATA) ============
+/* ============ SHORELINE-CHANGE LAYERS (PUBLIC-OPEN DATA · INDICATIVE) ============
    Derived by Street Pulse Foundation analysis (2026-10-04) from open
    Copernicus Sentinel-2 L2A imagery. Method: median-NDWI waterline extraction
    on 2016–2017 (5 scenes) and 2024–2025 (6 scenes) composites; transect
    displacement early->late along OSM coastline normals, 100 m spacing.
    Negative rate = landward retreat (erosion); positive = seaward advance.
-   Full method: earth-engine/METHODS.md. Indicative, not survey-grade. */
+   Confidence INDICATIVE (per CONFIDENCE-FRAMEWORK.md: per-transect uncertainty
+   ~±2.5 m/yr exceeds the median signals). Field validation pending. */
 const shoreGroup = L.layerGroup();    // 2016–17 vs 2024–25 waterlines
 const transectGroup = L.layerGroup(); // per-transect change rates
 
@@ -269,10 +293,11 @@ function rateColor(r){
   if (r <=  3) return '#74c0fc';
   return '#1971c2';
 }
+const MEASURED_BADGES = '<span class="badge b-open">PUBLIC-OPEN DATA</span> <span class="badge b-ind">INDICATIVE</span> <span class="badge b-fvp">⚠ FIELD VALIDATION PENDING</span>';
 function shorePopup(prefix){
-  return '<b>'+prefix+' shoreline</b> <span class="badge b-open">PUBLIC-OPEN DATA</span><br>'
+  return '<b>'+prefix+' shoreline</b> '+MEASURED_BADGES+'<br>'
     +'Satellite-derived waterline (median NDWI over Sentinel-2 L2A scenes, 10 m). '
-    +'Tidal stage averaged by compositing; not survey-grade. See Methods tab.';
+    +'Tidal stage averaged by compositing; not survey-grade. Confidence: <b>INDICATIVE</b>; field validation pending. See Methods tab.';
 }
 fetch('earth-engine/data/shoreline_early_median.geojson').then(r=>r.json()).then(fc=>{
   L.geoJSON(fc,{style:{color:'#1971c2',weight:2,dashArray:'6 4',opacity:0.9}})
@@ -291,20 +316,20 @@ fetch('earth-engine/data/shoreline_change_transects.geojson').then(r=>r.json()).
   }).bindPopup(function(l){
     const p = l.feature.properties;
     const dir = p.rate_m_per_yr < 0 ? 'erosion (landward retreat)' : (p.rate_m_per_yr > 0 ? 'accretion (seaward advance)' : 'no detectable change');
-    return '<b>Transect #'+p.transect_id+'</b> <span class="badge b-open">PUBLIC-OPEN DATA</span><br>'
+    return '<b>Transect #'+p.transect_id+'</b> '+MEASURED_BADGES+'<br>'
       +'Zone: '+p.zone+'<br>'
       +'Change: '+(p.change_m>0?'+':'')+p.change_m+' m ('+dir+')<br>'
       +'Rate: '+(p.rate_m_per_yr>0?'+':'')+p.rate_m_per_yr+' m/yr<br>'
       +'Period: '+p.period+'<br>'
-      +'Method: median-NDWI waterline, 100 m transects. Indicative, not survey-grade.';
+      +'Method: median-NDWI waterline, 100 m transects. Confidence: <b>INDICATIVE</b> — per-transect uncertainty ~±2.5 m/yr; rates within ±1 m/yr ≈ method noise. Field validation pending.';
   }).addTo(transectGroup);
 }).catch(()=>{});
 // Legend shown only while a shoreline layer is toggled on
 const shoreLegend = L.control({position:'bottomright'});
 shoreLegend.onAdd = function(){
   const d = L.DomUtil.create('div','card');
-  d.style.cssText = 'background:#fff;border:1px solid #d0d7de;border-radius:8px;padding:8px;font-size:11px;max-width:200px';
-  d.innerHTML = '<b>Shoreline change (m/yr)</b> <span class="badge b-open">PUBLIC-OPEN DATA</span><br>'
+  d.style.cssText = 'background:#fff;border:1px solid #d0d7de;border-radius:8px;padding:8px;font-size:11px;max-width:220px';
+  d.innerHTML = '<b>Shoreline change (m/yr)</b><br>'+MEASURED_BADGES+'<br>'
     +'<span style="color:#b42318">●</span> ≤ −8 severe erosion<br>'
     +'<span style="color:#e8590c">●</span> −8…−3 moderate erosion<br>'
     +'<span style="color:#f59e0b">●</span> −3…−1 mild erosion<br>'
@@ -314,32 +339,87 @@ shoreLegend.onAdd = function(){
     +'<i>Dashed blue: 2016–17 waterline · solid red: 2024–25 waterline</i>';
   return d;
 };
-function syncShoreLegend(){
-  const on = map.hasLayer(shoreGroup) || map.hasLayer(transectGroup);
-  if (on && !shoreLegend._map) shoreLegend.addTo(map);
-  if (!on && shoreLegend._map) map.removeControl(shoreLegend);
+
+/* ============ FLOOD-EXTENT LAYER (PUBLIC-OPEN DATA · INDICATIVE) ============
+   2021-11-07 Keta event. 31 indicative polygons at −3 dB from Sentinel-1 SAR
+   change detection (see earth-engine/FLOOD-METHODS.md).
+   The GeoJSON is stored in EPSG:32631; it is reprojected to WGS84 here with
+   proj4js before rendering. Framing is mandatory: "indicative co-event water
+   extent versus normal-condition extent" — NEVER "surge-only". Reported as a
+   range across the −2/−3/−4 dB sweep, never a point estimate. */
+const floodGroup = L.layerGroup();
+function floodPopup(p){
+  return '<b>Indicative co-event water extent</b> '+MEASURED_BADGES+'<br>'
+    +'2021-11-07 Keta event · this polygon: <b>'+p.area_ha_at_minus3dB+' ha</b> at the −3 dB threshold (the threshold used)<br>'
+    +'Sensitivity: '+p.area_ha_at_minus4dB+' ha core at stricter −4 dB · '+p.area_ha_at_minus2dB+' ha component at looser −2 dB (merges neighbors — not a second polygon set)<br>'
+    +'Event range (all 31 polygons): <b>30.8–65.9 ha</b> — always a range, never a point estimate<br>'
+    +'Framing: indicative co-event water extent <i>versus normal-condition extent</i> — not surge-only; no depth estimates<br>'
+    +'Confidence: <b>INDICATIVE</b> · ⚠ field validation pending · ≈ ±40 m absolute polygon placement uncertainty<br>'
+    +'Not suitable for compensation, resettlement, insurance, or engineering decisions.<br>'
+    +'Full method: <a href="earth-engine/FLOOD-METHODS.md">earth-engine/FLOOD-METHODS.md</a>';
 }
-map.on('layeradd layerremove', syncShoreLegend);
+if (typeof proj4 === 'undefined') {
+  const cb = document.getElementById('ck-flood');
+  if (cb) { cb.disabled = true; }
+  const note = document.getElementById('flood-load-note');
+  if (note) note.textContent = ' (proj4js failed to load — flood layer unavailable)';
+} else {
+  proj4.defs('EPSG:32631', '+proj=utm +zone=31 +datum=WGS84 +units=m +no_defs +type=crs');
+  fetch('earth-engine/data/flood_extent_2021-11.geojson').then(r=>r.json()).then(fc=>{
+    fc.features.forEach(f=>{
+      const re = ring => ring.map(c => proj4('EPSG:32631','WGS84',c)); // -> [lon,lat]
+      if (f.geometry.type === 'Polygon') f.geometry.coordinates = f.geometry.coordinates.map(re);
+      else if (f.geometry.type === 'MultiPolygon') f.geometry.coordinates = f.geometry.coordinates.map(poly => poly.map(re));
+    });
+    L.geoJSON(fc,{style:{color:'#0b2a4a',weight:1.5,fillColor:'#1d4ed8',fillOpacity:0.35}})
+      .bindPopup(function(l){ return floodPopup(l.feature.properties); })
+      .addTo(floodGroup);
+  }).catch(()=>{ document.getElementById('ck-flood').disabled = true; });
+}
+const floodLegend = L.control({position:'bottomright'});
+floodLegend.onAdd = function(){
+  const d = L.DomUtil.create('div','card');
+  d.style.cssText = 'background:#fff;border:1px solid #d0d7de;border-radius:8px;padding:8px;font-size:11px;max-width:220px';
+  d.innerHTML = '<b>2021-11-07 indicative flood extent</b><br>'+MEASURED_BADGES+'<br>'
+    +'<span style="display:inline-block;width:12px;height:12px;background:#1d4ed8;opacity:0.6;border:1px solid #0b2a4a;margin-right:4px"></span>'
+    +'31 polygons at −3 dB · event range 30.8–65.9 ha';
+  return d;
+};
+function syncLegends(){
+  const shoreOn = map.hasLayer(shoreGroup) || map.hasLayer(transectGroup);
+  if (shoreOn && !shoreLegend._map) shoreLegend.addTo(map);
+  if (!shoreOn && shoreLegend._map) map.removeControl(shoreLegend);
+  const floodOn = map.hasLayer(floodGroup);
+  if (floodOn && !floodLegend._map) floodLegend.addTo(map);
+  if (!floodOn && floodLegend._map) map.removeControl(floodLegend);
+}
+map.on('layeradd layerremove', syncLegends);
 
 /* ============ LAYER LIST UI ============ */
+const LAYER_BADGES = {
+  measured: [['b-open','PUBLIC-OPEN DATA'],['b-ind','INDICATIVE'],['b-fvp','⚠ FIELD VALIDATION PENDING']]
+};
+function badgesHTML(list){ return list.map(b=>'<span class="badge '+b[0]+'">'+b[1]+'</span>').join(' '); }
 const LAYERS = [
-  {id:'osm', label:'OpenStreetMap base map', tag:'b-open', tagtext:'PUBLIC-OPEN DATA', layer:osmBase, on:true,
+  {id:'osm', label:'OpenStreetMap base map', badges:[['b-open','PUBLIC-OPEN DATA']], layer:osmBase, on:true,
    methods:['PUBLIC-OPEN DATA','https://www.openstreetmap.org/copyright','Third-party open base map (ODbL). We did not process it.']},
-  {id:'s2', label:'Sentinel-2 cloudless imagery (satellite)', tag:'b-open', tagtext:'PUBLIC-OPEN DATA', layer:s2, on:false,
+  {id:'s2', label:'Sentinel-2 cloudless imagery (satellite)', badges:[['b-open','PUBLIC-OPEN DATA']], layer:s2, on:false,
    methods:['PUBLIC-OPEN DATA','https://tiles.maps.eox.at/ (EOX WMS); data: ESA Copernicus Sentinel-2','Third-party satellite mosaic. Useful for visual shoreline inspection; not an analysis product.']},
-  {id:'terrain', label:'Elevation context (SRTM-derived terrain)', tag:'b-open', tagtext:'PUBLIC-OPEN DATA', layer:terrain, on:false,
-   methods:['PUBLIC-OPEN DATA','https://tiles.maps.eox.at/ (SRTM-derived)','Elevation shading for context only. NOT a flood-risk model — flood-exposure zones are pending.']},
-  {id:'coast', label:'Coastline + illustrative risk segments', tag:'b-demo', tagtext:'MIXED: geometry PUBLIC-OPEN / scores DEMONSTRATION', layer:coastGroup, on:true,
+  {id:'terrain', label:'Elevation context (SRTM-derived terrain)', badges:[['b-open','PUBLIC-OPEN DATA']], layer:terrain, on:false,
+   methods:['PUBLIC-OPEN DATA','https://tiles.maps.eox.at/ (SRTM-derived)','Elevation shading for context only. NOT a flood-risk model — measured flood extent is the separate "Indicative flood extent" layer below.']},
+  {id:'coast', label:'Coastline + illustrative risk segments', badges:[['b-demo','MIXED: geometry PUBLIC-OPEN / scores DEMONSTRATION']], layer:coastGroup, on:true,
    methods:['MIXED','Geometry: https://www.openstreetmap.org (natural=coastline), retrieved 2026-10-04','Real OSM coastline geometry; per-segment colors are ILLUSTRATIVE 1–5 risk scores, not measurements.']},
-  {id:'lagoon', label:'Keta Lagoon boundary', tag:'b-open', tagtext:'PUBLIC-OPEN DATA', layer:null, on:true, note:'(loads from data/lagoon_osm.json)',
+  {id:'lagoon', label:'Keta Lagoon boundary', badges:[['b-open','PUBLIC-OPEN DATA']], layer:null, on:true, note:'(loads from data/lagoon_osm.json)',
    methods:['PUBLIC-OPEN DATA','OpenStreetMap relation 6270737 via Nominatim polygon_geojson, 2026-10-04 (ODbL)','Simplified boundary — approximate, not survey-grade. Lagoon is Ramsar Site #567.']},
-  {id:'comm', label:'Community locations (7 towns/villages)', tag:'b-open', tagtext:'PUBLIC-OPEN DATA', layer:commGroup, on:true,
+  {id:'comm', label:'Community locations (7 towns/villages)', badges:[['b-open','PUBLIC-OPEN DATA']], layer:commGroup, on:true,
    methods:['PUBLIC-OPEN DATA','Nominatim / OpenStreetMap search, retrieved 2026-10-04 (ODbL)','Real place coordinates. Kedzi = recommended primary proposed pilot location; Vodza = comparison site (analysis 2026-10-03). No engagement claimed.']},
-  {id:'shore', label:'Shorelines: 2016–2017 vs 2024–2025 (satellite-derived waterlines)', tag:'b-open', tagtext:'PUBLIC-OPEN DATA', layer:shoreGroup, on:false,
-   methods:['PUBLIC-OPEN DATA','Derived by our analysis (2026-10-04) from Copernicus Sentinel-2 L2A via AWS Open Data / Element84 Earth Search STAC (https://earth-search.aws.element84.com/v1); imagery © ESA Copernicus','Median-NDWI waterlines: 2016–2017 composite (5 scenes, dashed blue) vs 2024–2025 composite (6 scenes, solid red). Tidal stage averaged by compositing. Indicative, not survey-grade. Full method: earth-engine/METHODS.md.']},
-  {id:'transects', label:'Shoreline-change transects (per-100 m rates, 2017→2025)', tag:'b-open', tagtext:'PUBLIC-OPEN DATA', layer:transectGroup, on:false,
-   methods:['PUBLIC-OPEN DATA','Derived by our analysis (2026-10-04); same sources as shoreline layer above','106 transects along the open sandy coast (lon 0.997–1.052); rate = waterline displacement / 7.84 yr. Negative = erosion (landward retreat). Kedzi strip: median −0.66 m/yr, max erosion −9.19 m/yr. Rates within ±1 m/yr ≈ method noise. Indicative, not survey-grade.']},
-  {id:'demo', label:'Pollution observations (sample points)', tag:'b-demo', tagtext:'DEMONSTRATION DATA', layer:demoGroup, on:false,
+  {id:'shore', label:'Shorelines: 2016–2017 vs 2024–2025 (satellite-derived waterlines)', badges:LAYER_BADGES.measured, layer:shoreGroup, on:false,
+   methods:['PUBLIC-OPEN DATA + INDICATIVE + ⚠ FIELD VALIDATION PENDING','Derived by our analysis (2026-10-04) from Copernicus Sentinel-2 L2A via AWS Open Data / Element84 Earth Search STAC (https://earth-search.aws.element84.com/v1); imagery © ESA Copernicus','Median-NDWI waterlines: 2016–2017 composite (5 scenes, dashed blue) vs 2024–2025 composite (6 scenes, solid red). Tidal stage averaged by compositing. Confidence INDICATIVE (per-transect uncertainty ~±2.5 m/yr exceeds median signals). Field validation pending. Full method: earth-engine/METHODS.md.']},
+  {id:'transects', label:'Shoreline-change transects (per-100 m rates, 2017→2025)', badges:LAYER_BADGES.measured, layer:transectGroup, on:false,
+   methods:['PUBLIC-OPEN DATA + INDICATIVE + ⚠ FIELD VALIDATION PENDING','Derived by our analysis (2026-10-04); same sources as shoreline layer above','106 transects along the open sandy coast (lon 0.997–1.052); rate = waterline displacement / 7.84 yr. Negative = erosion (landward retreat). Kedzi strip: median −0.66 m/yr, max erosion −9.19 m/yr. Rates within ±1 m/yr ≈ method noise. Confidence INDICATIVE. Field validation pending.']},
+  {id:'flood', label:'Indicative flood extent — 2021-11-07 Keta event (31 polygons, −3 dB)', badges:LAYER_BADGES.measured, layer:floodGroup, on:false, note:'(loads from earth-engine/data/flood_extent_2021-11.geojson, EPSG:32631 → WGS84 in-browser)<span id="flood-load-note"></span>',
+   methods:['PUBLIC-OPEN DATA + INDICATIVE + ⚠ FIELD VALIDATION PENDING','Derived by our analysis (2026-10-04/05) from Copernicus Sentinel-1 IW GRD via AWS Open Data (sentinel-s1-l1c) / Element84 Earth Search STAC; imagery © ESA Copernicus','SAR ΔVV change detection (−2/−3/−4 dB sweep) versus Oct-2021 normal-condition extent. Indicative co-event water extent 30.8–65.9 ha (never a point estimate); not surge-only; no depth. Confidence INDICATIVE; field validation pending. Not suitable for compensation/resettlement/insurance/engineering. Full method: earth-engine/FLOOD-METHODS.md.']},
+  {id:'demo', label:'Pollution observations (sample points)', badges:[['b-demo','DEMONSTRATION DATA']], layer:demoGroup, on:false,
    methods:['DEMONSTRATION DATA','Illustrative positions created for this prototype','NOT real observations. Shows how future community/field data would render.']}
 ];
 const lagoonLayerRef = {layer:null};
@@ -354,7 +434,7 @@ const listEl = document.getElementById('layerlist');
 const mTable = document.getElementById('methodstable');
 LAYERS.forEach(Ly=>{
   const row = document.createElement('div'); row.className='layer-row';
-  row.innerHTML = '<input type="checkbox" '+(Ly.on?'checked':'')+' id="ck-'+Ly.id+'"><div><b>'+Ly.label+'</b> <span class="badge '+Ly.tag+'">'+Ly.tagtext+'</span>'+(Ly.note?'<div style="font-size:11px;color:#57606a">'+Ly.note+'</div>':'')+'</div>';
+  row.innerHTML = '<input type="checkbox" '+(Ly.on?'checked':'')+' id="ck-'+Ly.id+'"><div><b>'+Ly.label+'</b> '+badgesHTML(Ly.badges)+(Ly.note?'<div style="font-size:11px;color:#57606a">'+Ly.note+'</div>':'')+'</div>';
   listEl.appendChild(row);
   row.querySelector('input').addEventListener('change', e=>{
     let layer = (Ly.id==='lagoon') ? lagoonLayerRef.layer : Ly.layer;
@@ -362,45 +442,91 @@ LAYERS.forEach(Ly=>{
     if(e.target.checked) layer.addTo(map); else map.removeLayer(layer);
   });
   const tr = document.createElement('tr');
-  tr.innerHTML = '<td><b>'+Ly.label+'</b></td><td><span class="badge '+Ly.tag+'">'+Ly.tagtext+'</span></td><td style="font-size:11px;word-break:break-all">'+Ly.methods[1]+'</td><td>'+Ly.methods[2]+'</td>';
+  tr.innerHTML = '<td><b>'+Ly.label+'</b></td><td>'+badgesHTML(Ly.badges)+'</td><td style="font-size:11px;word-break:break-all">'+Ly.methods[1]+'</td><td>'+Ly.methods[2]+'</td>';
   mTable.appendChild(tr);
 });
-// extra methods rows: risk scores + reporting mockup + planned items
-[['Illustrative risk scores (dashboard + segment colors)','b-demo','Assigned in-prototype from documented hazard facts (validation matrix 2026-10-03: Kedzi ~17 m/yr down-drift erosion; Nov 2021 tidal disaster; WACA activity). NOT measured; field validation pending.'],
- ['Community reporting form + demo log','b-demo','Interface mockup. Submissions stay in this browser session; nothing is transmitted or stored.'],
- ['Shoreline-change from satellite archives','b-open','PUBLIC-OPEN DATA, derived by our analysis 2026-10-04 (earth-engine/METHODS.md). Open coast (106 transects, 2017-03-07 to 2025-01-07, 7.84 yr): median −0.37 m/yr; Kedzi coastal strip (n=99): median −0.66 m/yr, max erosion −9.19 m/yr at the worst transect; Keta town frontage (n=7): median +0.95 m/yr (sea-defence protected). Direction and down-drift pattern are consistent with documented erosion (~8 m/yr background, up to ~17 m/yr at hotspots); measured magnitudes are lower — field validation pending. Indicative, not survey-grade; ±1 m/yr ≈ method noise.'],
- ['Flood-exposure zones','b-planned','Pending elevation-based analysis (SRTM) + documented flood extents.'],
- ['Water-quality / plastic field observations','b-planned','Pending pilot-phase community transects and test kits.']
+// extra methods rows: risk scores + reporting mockup + shoreline summary + planned items
+[['Illustrative risk scores (dashboard + segment colors)',[['b-demo','DEMONSTRATION DATA']],'Assigned in-prototype from documented hazard facts (validation matrix 2026-10-03: Kedzi ~17 m/yr down-drift erosion; Nov 2021 tidal disaster; WACA activity). NOT measured; field validation pending.'],
+ ['Community reporting form + demo log',[['b-demo','DEMONSTRATION DATA']],'Interface mockup. Submissions stay in this browser session; nothing is transmitted or stored.'],
+ ['Shoreline-change from satellite archives',LAYER_BADGES.measured,'PUBLIC-OPEN DATA, derived by our analysis 2026-10-04 (earth-engine/METHODS.md). Open coast (106 transects, 2017-03-07 to 2025-01-07, 7.84 yr): median −0.37 m/yr; Kedzi coastal strip (n=99): median −0.66 m/yr, max erosion −9.19 m/yr at the worst transect; Keta town frontage (n=7): median +0.95 m/yr (sea-defence protected). Direction and down-drift pattern are consistent with documented erosion (~8 m/yr background, up to ~17 m/yr at hotspots); measured magnitudes are lower — field validation pending. Indicative, not survey-grade; ±1 m/yr ≈ method noise.'],
+ ['Historical flood extent from satellite archives',LAYER_BADGES.measured,'PUBLIC-OPEN DATA, derived by our analysis 2026-10-04/05 (earth-engine/FLOOD-METHODS.md). Indicative co-event water extent versus normal-condition extent for the 2021-11-07 Keta event: 30.8–65.9 ha across the −2/−3/−4 dB threshold sweep (−3 dB = 44.3 ha, 31 polygons); empirical no-flood floor 0–2.3 ha; lagoon-margin expansion, not open-beach shift. Not surge-only; no depth; not suitable for compensation/resettlement/insurance/engineering. Field validation pending.'],
+ ['Real-time flood monitoring',[['b-planned','PLANNED FUTURE FIELD DATA']],'Pending future work: no live flood data exists in this prototype.'],
+ ['Water-quality / plastic field observations',[['b-planned','PLANNED FUTURE FIELD DATA']],'Pending pilot-phase community transects and test kits.']
 ].forEach(r=>{
   const tr=document.createElement('tr');
-  const badgeText = r[1]==='b-demo' ? 'DEMONSTRATION DATA' : (r[1]==='b-open' ? 'PUBLIC-OPEN DATA' : 'PLANNED FUTURE FIELD DATA');
-  tr.innerHTML='<td><b>'+r[0]+'</b></td><td><span class="badge '+r[1]+'">'+badgeText+'</span></td><td style="font-size:11px">—</td><td>'+r[2]+'</td>';
+  tr.innerHTML='<td><b>'+r[0]+'</b></td><td>'+badgesHTML(r[1])+'</td><td style="font-size:11px">—</td><td>'+r[2]+'</td>';
   mTable.appendChild(tr);
 });
 
 /* ============ EVIDENCE DASHBOARD (computed metrics) ============
-   Every value below was computed 2026-10-04 with a script from
-   earth-engine/data/shoreline_change_transects.geojson
-   (see earth-engine/data/evidence_dashboard_metrics.json). Do not hand-edit. */
+   Every value below was computed by a script from the GeoJSONs in
+   earth-engine/data/ — not estimated. Do not hand-edit.
+   Each card carries SOURCE / DATE / METHOD / CONFIDENCE / FIELD VALIDATION
+   per CONFIDENCE-FRAMEWORK.md. */
+const MB = '<span class="badge b-open">PUBLIC-OPEN DATA</span> <span class="badge b-ind">INDICATIVE</span> <span class="badge b-fvp">⚠ FIELD VALIDATION PENDING</span>';
+function provHTML(s){
+  return '<div class="prov"><b>Source:</b> '+s.source+'<br><b>Date:</b> '+s.date+'<br><b>Method:</b> '+s.method+'<br><b>Confidence:</b> '+s.confidence+'<br><b>Field validation:</b> '+s.validation+'</div>';
+}
+function evCard(e, prov){
+  const d = document.createElement('div'); d.className='card';
+  d.innerHTML = '<div style="margin-bottom:4px">'+MB+'</div>'
+    +'<div style="font-size:12px;color:#57606a">'+e.label+'</div>'
+    +'<div class="score" style="font-size:20px;color:#0b2a4a">'+e.value+'</div>'
+    +'<div style="font-size:12px;color:#57606a">'+e.sub+'</div>'
+    +provHTML(prov);
+  return d;
+}
+const SHORE_PROV = {
+  source:'Derived by our analysis from Copernicus Sentinel-2 L2A (10 m), AWS Open Data / Element84 Earth Search STAC; contains modified Copernicus Sentinel data (ESA)',
+  date:'Analysis 2026-10-04 · imagery composite mid-dates 2017-03-07 → 2025-01-07',
+  method:'Pixel-wise median-NDWI waterlines per period; 106 shore-normal transects at 100 m spacing; rate = waterline displacement / 7.84 yr',
+  confidence:'INDICATIVE — per-transect uncertainty (~±2.5 m/yr) exceeds the median signals; ±1 m/yr noise floor; no ground truth (per CONFIDENCE-FRAMEWORK.md §3)',
+  validation:'PENDING — a GPS shoreline survey is required before these rates are used beyond indicative visualization'
+};
 const EVIDENCE = [
   {label:'Analysis period', value:'2017-03-07 → 2025-01-07', sub:'7.84 years of Sentinel-2 median composites'},
   {label:'Transects analyzed', value:'106', sub:'100 m spacing along the open sandy coast (lon 0.997–1.052)'},
   {label:'Open-coast median change rate', value:'−0.37 m/yr', sub:'negative = erosion (landward retreat)'},
   {label:'Kedzi coastal strip median', value:'−0.66 m/yr', sub:'n = 99 transects · proposed pilot zone'},
-  {label:'Worst measured erosion', value:'#352 · −9.19 m/yr', sub:'transect 352, Kedzi coastal strip'},
+  {label:'Worst measured erosion', value:'#352 · −9.19 m/yr', sub:'transect 352, Kedzi coastal strip · per-transect uncertainty ~±2.5 m/yr'},
   {label:'Eroding beyond method noise', value:'44 of 106 (41.5%)', sub:'rate < −1 m/yr (the ±1 m/yr noise floor)'},
   {label:'Communities represented', value:'7 named + 2 zones', sub:'7 mapped communities (Kedzi, Vodza, Keta, Tegbi, Woe, Fiaxor, Anloga) + 2 transect zones in the dataset'},
   {label:'Data honesty', value:'Indicative', sub:'not survey-grade · GPS field validation required'}
 ];
 const evEl = document.getElementById('evcards');
-EVIDENCE.forEach(e=>{
-  const d = document.createElement('div'); d.className='card';
-  d.innerHTML = '<div style="font-size:12px;color:#57606a">'+e.label+'</div>'
-    +'<div class="score" style="font-size:20px;color:#0b2a4a">'+e.value+'</div>'
-    +'<div style="font-size:12px;color:#57606a">'+e.sub+'</div>'
-    +'<div style="margin-top:5px"><span class="badge b-open">MEASURED · PUBLIC-OPEN DATA</span></div>';
-  evEl.appendChild(d);
-});
+EVIDENCE.forEach(e=>evEl.appendChild(evCard(e, SHORE_PROV)));
+
+const FLOOD_PROV = {
+  source:'Copernicus Sentinel-1 IW GRD (Copernicus/ESA) via AWS Open Data (sentinel-s1-l1c) + Element84 Earth Search STAC; contains modified Copernicus Sentinel data (ESA)',
+  date:'Analysis 2026-10-04/05 · event 2021-11-07 · co-event scene S1B 2021-11-08 (+1 day) · reference S1B 2021-10-15 (same relative orbit 74, same evening-descending geometry)',
+  method:'SAR ΔVV change detection; −2/−3/−4 dB threshold sweep; normal-condition extent = union of October-2021 water masks (VV < −15 dB); DEM ≤12 m lowland mask; morphologically cleaned, min 50 px components',
+  confidence:'INDICATIVE — threshold-sensitive with no ground truth; the default ceiling for unvalidated satellite layers (per CONFIDENCE-FRAMEWORK.md §3)',
+  validation:'PENDING — no field-mapped flood extents exist for this event'
+};
+const FLOOD_EVIDENCE = [
+  {label:'Indicative co-event water extent (range)', value:'30.8–65.9 ha',
+   sub:'0.31–0.66 km² across the −2/−3/−4 dB threshold sweep · −3 dB = 44.3 ha (31 polygons) · always a range, never a point estimate', prov:FLOOD_PROV},
+  {label:'Scenes (STAC-gated)', value:'2021-11-08 co-event',
+   sub:'Sentinel-1B, relative orbit 74, +1 day after the 2021-11-07 event · reference S1B 2021-10-15 (same satellite, orbit, geometry) · empirical no-flood floor from the quiet pair (2021-10-21 vs 2021-10-15): 0–2.3 ha — the event signal stands 19–29× above normal change variability', prov:FLOOD_PROV},
+  {label:'Spatial character', value:'Lagoon-margin expansion',
+   sub:'Median 32 m from the October normal-condition water edge; median 2.3 km from the ocean waterline — not open-beach shift · 88–89% VH cross-polarization agreement · optical NDWI anomaly +0.373 inside polygons vs −0.027 dry-land background (Sentinel-2, 2021-11-14, opportunistic only)', prov:FLOOD_PROV},
+  {label:'Communities in indicative extent', value:'0 of 2 verified in-AOI',
+   sub:'Abutiakope (0.8 km outside extent) and Dzelukope (0.6 km outside extent) are OSM-verified villages inside the analysis AOI — the mapped water did not reach their mapped centers · Dzita, Anloga, Atiteti, Fuveme are OSM-verified but outside the analysis AOI (no assessment) · Kedzikope, Agbledomi, Agokedzi, Serakope, Keta Central could not be verified as OSM place nodes — no claim',
+   prov:{source:'OpenStreetMap place nodes via the Nominatim search API (2026-10-05); distances measured to the nearest −3 dB indicative polygon', date:'Verification 2026-10-05 · analysis 2026-10-04/05', method:'Nominatim place-node lookup; only osm_type=node + class=place counts as verified', confidence:'INDICATIVE — inherits the extent layer confidence', validation:'PENDING'}},
+  {label:'Indicative population within extent', value:'≈4–5 people',
+   sub:'−2 dB: 5.2 · −3 dB: 4.3 · −4 dB: 4.3 — the extent is almost entirely unpopulated lagoon margin; this is a finding, not a failure',
+   prov:{source:'WorldPop Ghana 2020, 100 m constrained (maxar_v1), CC-BY-4.0 (via HDX)', date:'Population year 2020 · analysis 2026-10-04/05', method:'Zonal sum on the native 100 m grid (mass-conserving)', confidence:'INDICATIVE', validation:'PENDING'}},
+  {label:'Buildings intersecting indicative flood extent', value:'0',
+   sub:'8 buildings within 100 m of the extent at −2/−3 dB · 0 at −4 dB',
+   prov:{source:'Microsoft Global ML Building Footprints, 2026-08-13 refresh, CDLA-Permissive-2.0 (13,321 footprints in the AOI bbox)', date:'Footprint refresh 2026-08-13 · analysis 2026-10-04/05', method:'Polygon intersection of footprints with the indicative extent', confidence:'INDICATIVE', validation:'PENDING'}},
+  {label:'Flood analysis date', value:'2026-10-04/05',
+   sub:'Pipeline 04_flood_analysis.py + optical cross-check + exposure overlays · full record: earth-engine/FLOOD-METHODS.md',
+   prov:{source:'CoastalPulse Ghana technical team', date:'2026-10-04/05', method:'Documented pipeline; methods note FLOOD-METHODS.md', confidence:'INDICATIVE', validation:'PENDING'}},
+  {label:'Not suitable for', value:'compensation · resettlement · insurance · engineering',
+   sub:'No depth estimates, ever · storm surge, high tide and normal waterline variability cannot be separated from this data · nothing here may support compensation, resettlement, insurance, or engineering decisions', prov:FLOOD_PROV}
+];
+const floodEl = document.getElementById('floodcards');
+FLOOD_EVIDENCE.forEach(e=>floodEl.appendChild(evCard(e, e.prov)));
 
 /* ============ DASHBOARD (illustrative concept — not measured) ============ */
 const dashEl = document.getElementById('dashcards');

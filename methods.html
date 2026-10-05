@@ -3,14 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CoastalPulse Ghana — Methods (Prototype v0.2)</title>
+<title>CoastalPulse Ghana — Methods (Prototype v0.2.1)</title>
 <style>
-  :root{--ink:#1f2328;--mut:#57606a;--bg:#f6f8fa;--line:#d0d7de;--navy:#0b2a4a;--open:#0969da}
+  :root{--ink:#1f2328;--mut:#57606a;--bg:#f6f8fa;--line:#d0d7de;--navy:#0b2a4a;--open:#0969da;--demo:#9a6700}
   *{box-sizing:border-box}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg)}
   header{background:var(--navy);color:#fff;padding:14px 18px}
   header h1{font-size:18px;margin:0;font-weight:700}
   header .sub{font-size:12px;color:#c8d6e5;margin-top:4px}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;color:#fff;margin:1px 2px}
+  .b-open{background:var(--open)}
+  .b-ind{background:transparent;border:1.5px solid var(--mut);color:var(--mut)}
+  .b-fvp{background:transparent;border:1.5px dashed var(--demo);color:var(--demo)}
   .verstrip{background:#12355c;color:#fff;border-top:2px solid #e3b341;padding:6px 18px;font-size:12px}
   .verstrip b{font-weight:800}
   .verstrip .q{color:#ffd98a;font-weight:600}
@@ -30,10 +34,10 @@
 </head>
 <body>
 <header>
-  <h1>CoastalPulse Ghana — Methods <span style="font-weight:400;font-size:13px">(Prototype v0.2)</span></h1>
-  <div class="sub">How the satellite shoreline-change layers were produced, what they mean, and where they fall short. Nothing is hidden here — the limitations are part of the method.</div>
+  <h1>CoastalPulse Ghana — Methods <span style="font-weight:400;font-size:13px">(Prototype v0.2.1)</span></h1>
+  <div class="sub">How the satellite shoreline-change and flood analyses were produced, what they mean, and where they fall short. Nothing is hidden here — the limitations are part of the method.</div>
 </header>
-<div class="verstrip"><b>CoastalPulse Ghana — Prototype v0.2</b> <span class="q">· Prototype · Not yet field-deployed · Public/open-data analysis · Field validation planned</span></div>
+<div class="verstrip"><b>CoastalPulse Ghana — Prototype v0.2.1</b> <span class="q">· Prototype · Not yet field-deployed · Public/open-data analysis · Field validation planned</span></div>
 
 <main>
 
@@ -131,6 +135,63 @@
 </section>
 
 <section>
+<h2>Flood analysis — 2021-11-07 Keta event <span class="badge b-open">PUBLIC-OPEN DATA</span> <span class="badge b-ind">INDICATIVE</span> <span class="badge b-fvp">⚠ FIELD VALIDATION PENDING</span></h2>
+
+<p><b>Framing (read first):</b> this layer measures <b>indicative co-event water extent versus normal-condition extent</b> — it is <b>not</b> "surge-only" flood extent. On this ~1 m micro-tidal coast, storm surge, high tide, and normal waterline variability cannot be separated from this data, and no attempt is made to separate them. Flooded area is reported <b>as a range only</b> (sensitivity sweep — never a point estimate). <b>No depth estimates, ever.</b> Nothing here is framed or suitable for compensation, resettlement, insurance, or engineering use. No ground truth exists for this event.</p>
+
+<h3>Satellite data sources</h3>
+<ul>
+  <li><b>Sensor:</b> Sentinel-1 IW GRD (C-band SAR, 10 m), Copernicus / ESA.</li>
+  <li><b>Discovery:</b> Element84 Earth Search STAC (<code>sentinel-1-grd</code>); data from the AWS Open Data <code>sentinel-s1-l1c</code> bucket (uint16 amplitude COGs; georeferencing built from the product annotation XMLs).</li>
+  <li><b>Co-event scene:</b> Sentinel-1B, 2021-11-08 18:09 UTC — <b>+1 day</b> after the documented 2021-11-07 event, relative orbit 74.</li>
+  <li><b>Reference scenes:</b> Sentinel-1B 2021-10-15 18:09 UTC — same satellite, same relative orbit, same evening-descending geometry (24 days prior); plus Sentinel-1A 2021-10-21 for the empirical no-flood change floor. Measured co-registration shift: 0.00 px.</li>
+  <li><b>Exposure overlays:</b> WorldPop Ghana 2020 (100 m constrained, maxar_v1, CC-BY-4.0); Microsoft Global ML Building Footprints (2026-08-13 refresh, CDLA-Permissive-2.0); Copernicus DEM GLO-30 (coarse ≤12 m lowland mask only — never depth).</li>
+  <li><b>Attribution:</b> contains modified Copernicus Sentinel data (ESA), 2021.</li>
+</ul>
+
+<h3>Method (summary)</h3>
+<ol>
+  <li>Thermal-noise subtraction + radiometric calibration to sigma0 per product LUTs; simple Lee speckle filter (5×5); warp to a common EPSG:32631 grid (10 m) via the product geolocation grids.</li>
+  <li><b>Normal-condition extent:</b> water = pre-event VV &lt; −15 dB; mask = <b>union of water in the two October scenes</b> (wet in either ⇒ normally wet at least sometimes, including the intertidal zone). A pixel is a flood candidate only if dry in <b>both</b> pre-event scenes.</li>
+  <li>Change detection: ΔVV = co-event − reference median; flood candidate = land pixel with ΔVV ≤ threshold. <b>Threshold NOT fixed in advance: sensitivity sweep −2 / −3 / −4 dB.</b></li>
+  <li>Post-processing: Copernicus DEM ≤12 m lowland mask, 3×3 morphological opening, minimum 50 px (0.5 ha) connected components, vectorized to polygons. VH agreement: 88–89% of VV-flagged pixels also satisfy ΔVH ≤ threshold (independent-polarization QA).</li>
+</ol>
+
+<h3>Results (computed)</h3>
+<table>
+  <tr><th>Threshold</th><th>Indicative co-event water extent</th><th>Polygons</th><th>Quiet-pair (no-flood) floor</th><th>VH agreement</th></tr>
+  <tr><td>−2 dB</td><td>65.9 ha</td><td>43</td><td>2.3 ha</td><td>88%</td></tr>
+  <tr><td>−3 dB</td><td><b>44.3 ha</b></td><td><b>31</b></td><td>0.0 ha</td><td>89%</td></tr>
+  <tr><td>−4 dB</td><td>30.8 ha</td><td>22</td><td>0.0 ha</td><td>88%</td></tr>
+</table>
+<p><b>Indicative co-event water extent versus normal-condition extent: 30.8–65.9 ha (0.31–0.66 km²), reported as a range.</b> The empirical no-flood floor (same pipeline on 2021-10-21 vs 2021-10-15, no event between) is 0–2.3 ha: the event signal stands 19–29× above normal change variability at −3/−4 dB.</p>
+<p><b>Spatial character:</b> flood polygons ring the Keta Lagoon margins (median 32 m from the October normal-condition water edge; median 2.3 km from the ocean waterline) — <b>lagoon-margin expansion, not open-beach shift</b>. Largest polygon 13.9 ha, lagoon south shore near Kedzi.</p>
+<p><b>Optical cross-check (opportunistic):</b> nearest clear post-event Sentinel-2 scene 2021-11-14 — NDWI anomaly <b>+0.373 inside</b> the polygons vs <b>−0.027</b> dry-land background (7 days post-event; supporting evidence, not validation).</p>
+
+<h3>Exposure (indicative)</h3>
+<ul>
+  <li><b>Indicative population within extent:</b> ≈4–5 people (WorldPop 2020, 100 m: −2 dB 5.2 · −3 dB 4.3 · −4 dB 4.3). The extent is almost entirely unpopulated lagoon margin — a finding, not a failure.</li>
+  <li><b>Buildings intersecting indicative flood extent:</b> 0 (Microsoft footprints, 2026-08-13 refresh); 8 buildings within 100 m at −2/−3 dB, 0 at −4 dB.</li>
+  <li><b>Communities:</b> 0 of the 2 OSM-verified communities inside the analysis AOI are in the indicative extent — Abutiakope (0.8 km outside extent) and Dzelukope (0.6 km outside extent); the mapped water did not reach their mapped centers. Dzita, Anloga, Atiteti, Fuveme are OSM-verified but outside the analysis AOI (no assessment). Kedzikope, Agbledomi, Agokedzi, Serakope, Keta Central could not be verified as distinct OSM place nodes — no claim.</li>
+</ul>
+
+<h3 class="no">Limitations — read before using these numbers</h3>
+<div class="lim">
+<ul>
+  <li><b>Tide vs surge unresolvable</b> — the Nov 8 acquisition's tidal stage is not separated from surge-driven water.</li>
+  <li><b>Threshold-sensitive:</b> area varies ~2× across −2…−4 dB — shown as a range, never a point estimate.</li>
+  <li><b>No depth estimates, ever.</b> SAR change detection gives extent only.</li>
+  <li><b>No ground truth:</b> no confusion matrix, no accuracy percentages. The quiet-pair floor is an empirical <i>change</i> floor, not a validation.</li>
+  <li><b>Wind-roughened floodwater</b> can appear bright and be missed — the extent is a lower-bound-style indicator, not a census.</li>
+  <li><b>Acquisition timing:</b> co-event scene is ~1 day post-event; water may have partially receded.</li>
+  <li><b>Absolute polygon placement</b> carries ≈ ±40 m uncertainty; relative co-registration is 0.00 px (same orbit).</li>
+  <li><b>Not suitable</b> for compensation, resettlement, insurance, or engineering decisions.</li>
+</ul>
+</div>
+<p><b>Full technical record:</b> <a href="earth-engine/FLOOD-METHODS.md"><code>earth-engine/FLOOD-METHODS.md</code></a> — the complete methods document with the error budget, sensitivity tables, and the SHIPPABLE verdict (produced 2026-10-05).</p>
+</section>
+
+<section>
 <h2>What this prototype does not do</h2>
 <ul>
   <li><b>Nothing is field-deployed.</b> No sensors, no field measurements by Street Pulse Foundation.</li>
@@ -141,13 +202,13 @@
 
 <section>
 <h2>Full technical record</h2>
-<p>The complete methods note, scripts, QA artifacts, and noise-check outputs live at <code>earth-engine/METHODS.md</code> (analysis date 2026-10-04). The numbers on this page are copied from it exactly.</p>
+<p>The complete methods notes, scripts, QA artifacts, and noise-check outputs live at <code>earth-engine/METHODS.md</code> (shoreline analysis, 2026-10-04) and <a href="earth-engine/FLOOD-METHODS.md"><code>earth-engine/FLOOD-METHODS.md</code></a> (flood analysis, 2026-10-05). The numbers on this page are copied from them exactly.</p>
 <p><a href="index.html">← Back to the CoastalPulse Ghana prototype map</a></p>
 </section>
 
 </main>
 <footer>
-  CoastalPulse Ghana is a prototype initiative of StreetPulse Blue, a program of Street Pulse Foundation. Public Prototype v0.2 — not yet field-deployed, field validation planned. Map tiles: © OpenStreetMap contributors (ODbL). Imagery attribution: contains modified Copernicus Sentinel data (ESA), 2017 &amp; 2024–2025.
+  CoastalPulse Ghana is a prototype initiative of StreetPulse Blue, a program of Street Pulse Foundation. Public Prototype v0.2.1 — not yet field-deployed, field validation planned. Map tiles: © OpenStreetMap contributors (ODbL). Imagery attribution: contains modified Copernicus Sentinel data (ESA), 2017 &amp; 2024–2025 (shoreline) and 2021 (flood).
 </footer>
 </body>
 </html>
